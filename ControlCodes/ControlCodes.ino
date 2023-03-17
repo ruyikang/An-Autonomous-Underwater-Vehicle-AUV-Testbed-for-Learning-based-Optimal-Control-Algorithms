@@ -161,18 +161,7 @@ void loop() {
           digitalWrite(backwardPin, LOW);
           digitalWrite(leftPin, HIGH);
           digitalWrite(rightPin, LOW);
-          digitalWrite(upPin, HIGH);7
-          7
-          2
-          2
-          2
-          1
-          1
-          1
-          2
-          2
-          2
-          
+          digitalWrite(upPin, HIGH);
           digitalWrite(divePin, HIGH);
           delay(150);  
           }
