@@ -23,7 +23,7 @@ def main():
 
     topwater = 48 # 顶部（潜艇付出水面） #actually 48    # 水深23cm 从48-72cm 但submarine高5cm，所以深度为67cm
     #cap = cv2.VideoCapture(1) # for macbook
-    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)   # open 1080hp camera (0), computer camera is (1)
+    cap = cv2.VideoCapture(2,cv2.CAP_DSHOW)   # open 1080hp camera (0), computer camera is (1)
     fps = 60
     cap.set(6, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))  # MJPG
     cap.set(5, fps)  # fps

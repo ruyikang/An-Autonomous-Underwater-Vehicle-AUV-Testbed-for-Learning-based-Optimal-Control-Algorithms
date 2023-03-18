@@ -7,7 +7,7 @@ import time
 import cvzone
 
 import joblib
-model = joblib.load(r"DTC_task1_v1.pkl")
+model = joblib.load(r"DTC_task1_v4.pkl")
 
 import serial
 arduinoData = serial.Serial('com3', 115200)
@@ -178,6 +178,9 @@ def main():
             width = str(min_area_rect[1][0]).split('.')[0]
             height = str(min_area_rect[1][1]).split('.')[0]
             theta1 = str(min_area_rect[2]).split('.')[0]
+
+            if int(center_x) > 670:
+                cX = cX + 4
             #
             # if int(width) > 220 and int(height) < 50: #防止检测出长而宽的裂痕
             #     #print("overlap!!")
@@ -284,6 +287,7 @@ def main():
             center_x_real = int((int(center_x)-x_pixel) / conver_x)
             center_y_real = int((int(center_y)-y_pixel) / conver_y)
             center_xy_real = (center_x_real,center_y_real)
+            coordinate = (center,cX,cY)
             width_distance = (distance,pref_long,pref_short)
             if plate_type[res_index] == 'black':
                 dataline_black = ("black:",distance)
@@ -301,14 +305,14 @@ def main():
             #approx = cv2.approxPolyDP(cnt, epsilon, True)
             #area_rect = min_area_rect[1][0] * min_area_rect[1][1]
             #area_approx = cv2.contourArea(cnt)
-            #cv2.drawContours(canvas, cnt, -1, (255, 0, 0), 2)    # for object contour
+            cv2.drawContours(canvas, cnt, -1, (255, 0, 0), 2)    # for object contour
             cv2.drawContours(canvas, [rect_contour], -1, (0, 255, 0), 2) # for rectagle contour
             # cv2.circle(canvas, (cX, cY), 4, (0, 255, 255), -1) # for mass center
             cv2.circle(canvas, (int(center.split(',')[0]), int(center.split(',')[1])), 4, (0, 0, 255), -1)
             # cv2.circle(canvas, (int(x2), int(y2)), 4, (0, 0, 255), -1)
             cv2.putText(canvas, center, (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
-            cv2.putText(canvas, str(compare_wh), (20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+            cv2.putText(canvas, str(coordinate), (20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
             # #cv2.putText(canvas, str(dataline_blue), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
@@ -377,7 +381,7 @@ def main():
                 #cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
-                #print("重心左下，中心右上")
+                #`print`("重心左下，中心右上")
                 cv2.putText(canvas, str("重心左下，中心右上"), (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             2)
                 yaw_actual1 = int(theta1) - 90
