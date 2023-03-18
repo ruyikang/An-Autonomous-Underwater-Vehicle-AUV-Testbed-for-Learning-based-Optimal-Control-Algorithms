@@ -102,7 +102,7 @@ def main():
         gray1[gray1 < 50] = 0  # 把中间像素转化为黑与白
         blur = cv2.medianBlur(gray1, 3)  # median blur
         ret, dst = cv2.threshold(blur, 105, 255, cv2.THRESH_BINARY_INV) # 与环境有关, can be adjusted 前值越小 越能放噪音 但太小会导致本身轮廓消失
-        kernel = np.ones((3, 3), np.uint8)
+        kernel = np.ones((1, 1), np.uint8)
         obj_bin = cv2.erode(dst, kernel, iterations=1)
         kernel = np.ones((3, 3), np.uint8)
         obj_bin = cv2.dilate(obj_bin, kernel, iterations=1)
@@ -446,19 +446,9 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
-        if distance < 50:
-            myCmd = str(5)
-            myCmd = myCmd + '\r'
-            arduinoData.write(myCmd.encode())
-        elif distance > 60:
-            myCmd = str(4)
-            myCmd = myCmd + '\r'
-            arduinoData.write(myCmd.encode())
-
         if counter%4 == 0:
             # center_x_real,center_y_real,yaw_actual
             obs = [[-center_y_real, -center_x_real, yaw_actual2]]
-
             action = model.predict(obs)
             print("{}".format(action))
             myCmd = str(action[0])
