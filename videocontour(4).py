@@ -7,7 +7,7 @@ import time
 import cvzone
 
 import joblib
-model = joblib.load(r"DTC_task1.pkl")
+model = joblib.load(r"DTC_task1_v1.pkl")
 
 import serial
 arduinoData = serial.Serial('com3', 115200)
@@ -446,9 +446,36 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
-        if counter%4 == 0:
+
+
+
+
+
+        if counter%5 == 0:
+            if center_x_real < 5 or center_x_real > 58:
+                if yaw_actual > 0:
+                    for i in range(1):
+                        myCmd = str(8)
+                        myCmd = myCmd + '\r'
+                        arduinoData.write(myCmd.encode())
+                        break
+                elif yaw_actual < 0:
+                    for i in range(1):
+                        myCmd = str(9)
+                        myCmd = myCmd + '\r'
+                        arduinoData.write(myCmd.encode())
+                        break
             # center_x_real,center_y_real,yaw_actual
             obs = [[-center_y_real, -center_x_real, yaw_actual2]]
+            # if distance < 50:
+            #     myCmd = str(5)
+            #     myCmd = myCmd + '\r'
+            #     arduinoData.write(myCmd.encode())
+            # elif distance > 60:
+            #     myCmd = str(4)
+            #     myCmd = myCmd + '\r'
+            #     arduinoData.write(myCmd.encode())
+
             action = model.predict(obs)
             print("{}".format(action))
             myCmd = str(action[0])

@@ -49,7 +49,7 @@ void loop() {
   digitalWrite(upPin, LOW);
   digitalWrite(divePin, HIGH); 
   switch (cmd){
-    case 10:
+    case 10: // Stop
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, HIGH);
@@ -59,7 +59,7 @@ void loop() {
       cmdFlag = cmd;
       delay(cmdTime);
       break;
-    case 2:
+    case 2: // Forward
       digitalWrite(forwardPin, LOW);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, HIGH);
@@ -67,19 +67,34 @@ void loop() {
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH);
       cmdFlag = cmd;
-      delay(150);
+      delay(200);
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, HIGH);
       digitalWrite(leftPin, HIGH);
       digitalWrite(rightPin, LOW);
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH);
-      delay(50);
+      delay(100);
+      digitalWrite(forwardPin, LOW);
+      digitalWrite(backwardPin, LOW);
+      digitalWrite(leftPin, HIGH);
+      digitalWrite(rightPin, LOW);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, HIGH);
+      cmdFlag = cmd;
+      delay(100);
+      digitalWrite(forwardPin, HIGH);
+      digitalWrite(backwardPin, HIGH);
+      digitalWrite(leftPin, HIGH);
+      digitalWrite(rightPin, LOW);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, HIGH);
+      delay(260);
              
       // Serial.print("cmd =" + cmd);
       // Serial.print("cmdFlag =" + cmdFlag);
       break;
-    case 1:
+    case 1: //Backward
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, HIGH);
       digitalWrite(leftPin, HIGH);
@@ -96,7 +111,7 @@ void loop() {
       digitalWrite(divePin, HIGH);
       delay(200);
       break;
-    case 3:
+    case 3: // Left
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, LOW);
@@ -104,16 +119,31 @@ void loop() {
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH);
       cmdFlag = cmd;
-      delay(220);
+      delay(130);
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, HIGH);
       digitalWrite(rightPin, HIGH);
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH);
-      delay(200);
+      delay(140);
+      digitalWrite(forwardPin, HIGH);
+      digitalWrite(backwardPin, LOW);
+      digitalWrite(leftPin, LOW);
+      digitalWrite(rightPin, LOW);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, HIGH);
+      cmdFlag = cmd;
+      delay(100);
+      digitalWrite(forwardPin, HIGH);
+      digitalWrite(backwardPin, LOW);
+      digitalWrite(leftPin, HIGH);
+      digitalWrite(rightPin, HIGH);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, HIGH);
+      delay(120);
       break;
-    case 0:
+    case 0: // Right
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, HIGH);
@@ -121,16 +151,31 @@ void loop() {
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH);
       cmdFlag = cmd;
-      delay(150); // Limitation is 100ms and cannot be less
+      delay(160); // Limitation is 100ms and cannot be less150
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, LOW);
       digitalWrite(rightPin, LOW);
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH);
-      delay(160);
+      delay(140); //160
+      digitalWrite(forwardPin, HIGH);
+      digitalWrite(backwardPin, LOW);
+      digitalWrite(leftPin, HIGH);
+      digitalWrite(rightPin, HIGH);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, HIGH);
+      cmdFlag = cmd;
+      delay(100); // Limitation is 100ms and cannot be less150
+      digitalWrite(forwardPin, HIGH);
+      digitalWrite(backwardPin, LOW);
+      digitalWrite(leftPin, LOW);
+      digitalWrite(rightPin, LOW);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, HIGH);
+      delay(140); //160
       break;
-    case 4:
+    case 4: // Up
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
       digitalWrite(leftPin, HIGH);
@@ -140,7 +185,7 @@ void loop() {
       cmdFlag = cmd;
       delay(200);
       break;
-    case 5:
+    case 5: // Down
 //    When the down button keeps working for a period of 1080ms, the bump reaches its limit
       digitalWrite(forwardPin, HIGH);
       digitalWrite(backwardPin, LOW);
