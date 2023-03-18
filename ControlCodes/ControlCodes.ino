@@ -16,6 +16,7 @@ int upNum = 5;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  Serial2.begin(115200);
   pinMode(forwardPin, OUTPUT);
   pinMode(backwardPin, OUTPUT);
   pinMode(leftPin, OUTPUT);
@@ -137,37 +138,17 @@ void loop() {
       digitalWrite(upPin, HIGH);
       digitalWrite(divePin, HIGH);
       cmdFlag = cmd;
-      delay(cmdTime);
+      delay(200);
       break;
     case 5:
-      downNum = 20;
-      upNum = 3;
-      int count = 0;
-      while (count < 10){
-        int stableDownNum = 5;
-        int stableUpNum = 3;
-        for (int j=0; j<stableDownNum; j++){
-          digitalWrite(forwardPin, HIGH);
-          digitalWrite(backwardPin, LOW);
-          digitalWrite(leftPin, HIGH);
-          digitalWrite(rightPin, LOW);
-          digitalWrite(upPin, LOW);
-          digitalWrite(divePin, LOW);
-          delay(120);  
-          }
-        delay(200);
-        for (int j=0; j<stableUpNum; j++){
-          digitalWrite(forwardPin, HIGH);
-          digitalWrite(backwardPin, LOW);
-          digitalWrite(leftPin, HIGH);
-          digitalWrite(rightPin, LOW);
-          digitalWrite(upPin, HIGH);
-          digitalWrite(divePin, HIGH);
-          delay(150);  
-          }
-        delay(200);
-        count = count + 1;
-        }
+//    When the down button keeps working for a period of 1080ms, the bump reaches its limit
+      digitalWrite(forwardPin, HIGH);
+      digitalWrite(backwardPin, LOW);
+      digitalWrite(leftPin, HIGH);
+      digitalWrite(rightPin, LOW);
+      digitalWrite(upPin, LOW);
+      digitalWrite(divePin, LOW);
+      delay(200);
       break;
     case 7:
       digitalWrite(forwardPin, LOW);

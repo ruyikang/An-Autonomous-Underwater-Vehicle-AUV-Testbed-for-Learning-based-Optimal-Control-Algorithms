@@ -446,9 +446,19 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
+        if distance < 50:
+            myCmd = str(5)
+            myCmd = myCmd + '\r'
+            arduinoData.write(myCmd.encode())
+        elif distance > 60:
+            myCmd = str(4)
+            myCmd = myCmd + '\r'
+            arduinoData.write(myCmd.encode())
+
         if counter%4 == 0:
             # center_x_real,center_y_real,yaw_actual
             obs = [[-center_y_real, -center_x_real, yaw_actual2]]
+
             action = model.predict(obs)
             print("{}".format(action))
             myCmd = str(action[0])
