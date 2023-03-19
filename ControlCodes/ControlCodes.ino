@@ -38,10 +38,16 @@ void loop() {
   digitalWrite(upPin, LOW);
   digitalWrite(divePin, HIGH); 
   while(Serial.available() > 0){
-  // cmd = Serial.readStringUntil('\r').;
+//  cmd = Serial.readStringUntil('\r').;
+//  int index = str.indexOf(' ');
+//  int cmd1 = str.substring(0, index).toInt();
+//  int cmd2 = str.substring(index + 1, str.length()).toInt();
+//  Serial1.write(cmd2);
+  
+  
   cmd =  Serial.readStringUntil('\r').toInt();
-  // Serial.print("cmd =" + cmd);
-  // Serial.print("cmdFlag =" + cmdFlag);
+  
+
   digitalWrite(forwardPin, HIGH);
   digitalWrite(backwardPin, LOW);
   digitalWrite(leftPin, HIGH);
