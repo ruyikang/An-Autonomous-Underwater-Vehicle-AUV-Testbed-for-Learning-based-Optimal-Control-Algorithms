@@ -17,6 +17,9 @@ int controls[7][6] = {{1,0,1,0,1,0}, // Stop d = 0
                       };
 
 unsigned long storedTime = 0;
+unsigned long storedFloatTime = 0;
+int diveFlag = 0;
+int upFlag = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -37,6 +40,7 @@ void loop() {
   if(Serial.available() > 0){
     cmd =  Serial.readStringUntil('\r').toInt();
     storedTime = millis();
+    storedFloatTime = millis();
   }
 
   if(cmd == 10){ // Stop
@@ -206,6 +210,24 @@ void loop() {
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[0][(i-23)/2]);
       }
+    }
+  }
+
+  if(cmd == 6){ // Keep floating
+    int floatInterval1 = 1000;
+    int floatInterval2 = 1000;
+    if((currentTime - storedFloatTime >= 0) && (currentTime - storedFloatTime < floatInterval1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[5][(i-23)/2]);
+      }
+    }
+    else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[6][(i-23)/2]);
+      }
+    }
+    else{
+      storedFloatTime = currentTime;
     }
   }
 }
