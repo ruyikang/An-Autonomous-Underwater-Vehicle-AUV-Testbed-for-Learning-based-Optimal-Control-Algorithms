@@ -13,6 +13,11 @@ int commaposition,blankposition;
 int downNum = 5;
 int upNum = 5;
 
+unsigned long ms_from_start = 0;
+unsigned long ms_previous_read_1;
+unsigned long ms_previous_read_2;
+unsigned long ms_previous_read_3;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -46,14 +51,6 @@ void loop() {
   
   
   cmd =  Serial.readStringUntil('\r').toInt();
-  
-
-  digitalWrite(forwardPin, HIGH);
-  digitalWrite(backwardPin, LOW);
-  digitalWrite(leftPin, HIGH);
-  digitalWrite(rightPin, LOW);
-  digitalWrite(upPin, LOW);
-  digitalWrite(divePin, HIGH); 
   switch (cmd){
     case 10: // Stop
       digitalWrite(forwardPin, HIGH);
@@ -63,7 +60,6 @@ void loop() {
       digitalWrite(upPin, LOW);
       digitalWrite(divePin, HIGH); 
       cmdFlag = cmd;
-      delay(cmdTime);
       break;
     case 2: // Forward
       digitalWrite(forwardPin, LOW);
