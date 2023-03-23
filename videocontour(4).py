@@ -15,17 +15,17 @@ arduinoData = serial.Serial('com3', 115200)
 def main():
 
     # configuration
-    last_distance = [48,48,48] # blue, green, black
-    last_yaw = [0,0,0] # blue, green, black
+    last_distance = [48,48,48] # blue, yellow, black
+    last_yaw = [0,0,0] # blue, yellow, black
     pref_long = 0  #long pixel for contour
     pref_short = 0  #short pixel for contour
-    plate_type = ["blue", "green", "black"]
+    plate_type = ["blue", "yellow", "black"]
     res_index = 0
     counter = 0
     switch = 0
     distance = 48
     dataline_blue =(0,0)
-    dataline_green = (0, 0)
+    dataline_yellow = (0, 0)
     dataline_black = (0, 0)
 
     topwater = 48 # 顶部（潜艇付出水面） #actually 48    # 水深23cm 从48-72cm 但submarine高5cm，所以深度为67cm
@@ -48,12 +48,12 @@ def main():
     upper_blue_hsv = np.array([124, 255, 255])
     #lower_red_hsv = np.array([156, 43, 46])
     #upper_red_hsv = np.array([180, 255, 255])
-    lower_green_hsv = np.array([35, 43, 46])
-    upper_green_hsv = np.array([77, 255, 255])
+    lower_yellow_hsv = np.array([26, 43, 46])
+    upper_yellow_hsv = np.array([34, 255, 255])
     lower_black_hsv = np.array([0, 0, 46])
     upper_black_hsv = np.array([180, 43, 150])
     color_dict['blue'] = [lower_blue_hsv, upper_blue_hsv]
-    color_dict['green'] = [lower_green_hsv, upper_green_hsv]
+    color_dict['yellow'] = [lower_yellow_hsv, upper_yellow_hsv]
     color_dict['black'] = [lower_black_hsv, upper_black_hsv]
 
     #template = cv2.imread("template.png",0)
@@ -201,14 +201,14 @@ def main():
                 frame = frame.astype(np.uint8)
             img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # change to HSV
             mask_blue = cv2.inRange(img_hsv, color_dict['blue'][0], color_dict['blue'][1])
-            mask_green = cv2.inRange(img_hsv, color_dict['green'][0], color_dict['green'][1])
+            mask_yellow = cv2.inRange(img_hsv, color_dict['yellow'][0], color_dict['yellow'][1])
             mask_black = cv2.inRange(img_hsv, color_dict['black'][0], color_dict['black'][1])
             blue_sum = (mask_blue == 255).sum()
-            green_sum = (mask_green == 255).sum()
+            yellow_sum = (mask_yellow == 255).sum()
             black_sum = (mask_black == 255).sum()
-            sum_list = np.array([blue_sum, green_sum,black_sum])
+            sum_list = np.array([blue_sum, yellow_sum,black_sum])
             res_index = np.argmax(sum_list)  # choose the maximum value
-            plate_type = ["blue", "green", "black"]
+            plate_type = ["blue", "yellow", "black"]
 
             center = str(min_area_rect[0][0]).split('.')[0] + ',' + str(min_area_rect[0][1]).split('.')[0]
             x = int(center.split(',')[0])
@@ -233,7 +233,7 @@ def main():
             if plate_type[res_index] == 'black':
                 #distance = int((f * Wb) / (pref*pi))
                 distance = int(equ5(pref_short))
-            elif plate_type[res_index] == 'green':
+            elif plate_type[res_index] == 'yellow':
                 distance = int(equ6(pref_long))
                 # if abs(int(equ5(pref_short)) - distance) > 4:
                 #     distance = int(equ5(pref_short))
@@ -260,7 +260,7 @@ def main():
                         distance = distance - 1
                     else:
                         distance = distance
-            elif plate_type[res_index] == 'green':
+            elif plate_type[res_index] == 'yellow':
                 if abs(last_distance[1] - distance) >= 1:
                     if last_distance[1] > distance:
                         distance = distance + 1
@@ -291,8 +291,8 @@ def main():
             width_distance = (distance,pref_long,pref_short)
             if plate_type[res_index] == 'black':
                 dataline_black = ("black:",distance)
-            elif plate_type[res_index] == 'green':
-                dataline_green = ("green:",distance)
+            elif plate_type[res_index] == 'yellow':
+                dataline_yellow = ("yellow:",distance)
             elif plate_type[res_index] == 'blue':
                 dataline_blue = ("blue:", distance)
             compare_wh = (int(distance),int(width),int(height),int(yaw_actual),int(yaw_actual1))
@@ -316,7 +316,7 @@ def main():
                         2)
             # #cv2.putText(canvas, str(dataline_blue), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
-            # cv2.putText(canvas, str(dataline_green), (40, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+            # cv2.putText(canvas, str(dataline_yellow), (40, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
             # cv2.putText(canvas, str(dataline_black), (60, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
@@ -436,7 +436,7 @@ def main():
             if plate_type[res_index] == 'black':
                 last_distance[0] = distance
                 last_yaw[0] = yaw_actual
-            elif plate_type[res_index] == 'green':
+            elif plate_type[res_index] == 'yellow':
                 last_distance[1] = distance
                 last_yaw[1] = yaw_actual
             elif plate_type[res_index] == 'black':
