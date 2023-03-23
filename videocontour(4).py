@@ -179,8 +179,15 @@ def main():
             height = str(min_area_rect[1][1]).split('.')[0]
             theta1 = str(min_area_rect[2]).split('.')[0]
 
-            if int(center_x) > 670:
-                cX = cX + 4
+            if int(center_x) > 720:
+                cX = cX + 0.05*int(center_x)
+            elif int(center_x) < 560:
+                cX = cX - 0.05*(1280-int(center_x))
+                
+            if int(center_y) > 600:
+                cY = cY + 0.05 * int(center_y)
+            elif int(center_y) < 120:
+                cY = cY - 0.05*(720-int(center_y))
             #
             # if int(width) > 220 and int(height) < 50: #防止检测出长而宽的裂痕
             #     #print("overlap!!")
