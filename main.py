@@ -486,16 +486,15 @@ def main():
 
         if counter % 5 == 0:
             obs = [[-center_y_real, -center_x_real, yaw_actual2]]
-            PIDinp = str(distance) + '\r'
-            arduinoData.write(PIDinp.encode())
+            PIDinp = str(distance)
+            action = model.predict(obs)
 
+            print("{}".format(action))
 
-            # action = model.predict(obs)
-            # print("{}".format(action))
-            # myCmd = str(action[0])
-            # # print("action: {}".format(cmd))
-            # myCmd = myCmd + '\r'
-            # arduinoData.write(myCmd.encode())
+            myCmd = str(action[0]) + PIDinp
+            # print("action: {}".format(cmd))
+            myCmd = myCmd + '\r'
+            arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()

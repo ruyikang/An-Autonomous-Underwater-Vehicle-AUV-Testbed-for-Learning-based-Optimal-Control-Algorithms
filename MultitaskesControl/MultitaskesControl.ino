@@ -19,7 +19,7 @@ double kp = 5;
 double ki = 5;
 double kd = 1;
 
-long int actualDistance = 0;
+int actualDistance = 0;
 unsigned long currentTime,currentTimePID, previousTime;
 double elapsedTime;
 double error;
@@ -79,19 +79,19 @@ void setup() {
 void loop() {
   currentTime = millis();
   currentTimePID = millis();
+  // Receive signal data from Pyton terminal
   if(Serial.available() > 0){
-//    cmd =  Serial.readStringUntil(' ').toInt();
-//    cmd2 = Serial.readStringUntil('\r').toInt();
-//    cmd = Serial.readStringUntil('\r').toInt();
-    String distance = Serial.readStringUntil('\r');
-    actualDistance = distance.toInt();
+    cmd =  Serial.readStringUntil(' ').toInt();
+    actualDistance = Serial.readStringUntil('\r').toInt();
     storedTime = millis();
     storedFloatTime = millis();
 
     input = actualDistance;
     output = computePID(input);
-    
-    if(output >= 0){ // Dive
+    }
+
+  // PID floting algorithm:
+  if(output >= 0){ // Dive
         int timeDelay1 = output;
         if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
           for(int i=23; i<=33; i+=2){
@@ -119,7 +119,6 @@ void loop() {
           }
         }
       }
-  }
 
 
 
@@ -127,7 +126,7 @@ void loop() {
 
 
   
-
+  // Basic operating
   if(cmd == 10 && actualDistance == 0){ // Stop
     for(int i=23; i<=33; i+=2){
       digitalWrite(i,controls[0][(i-23)/2]);
@@ -171,6 +170,44 @@ void loop() {
     }
   }
 
+  if(cmd2 == 2){ // Forward
+    int timeDelay1 = 200;
+    int timeDelay2 = 100;
+    int timeDelay3 = 100;
+    int timeDelay4 = 150;
+
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[1][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1) && (currentTime - storedTime < timeDelay1+timeDelay2)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[2][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1+timeDelay2)&&(currentTime - storedTime < timeDelay1+timeDelay2+timeDelay3)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[1][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3)&&(currentTime - storedTime < timeDelay1+timeDelay2+timeDelay3+timeDelay4)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[2][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[0][(i-23)/2]);
+      }
+    }
+  }
+//************************************************************************************************************************
+//************************************************************************************************************************
   if(cmd == 1){ // Backward
     int timeDelay1 = 300;
     int timeDelay2 = 200;
@@ -193,6 +230,31 @@ void loop() {
       }
     }
   }
+
+  if(cmd2 == 1){ // Backward
+    int timeDelay1 = 300;
+    int timeDelay2 = 200;
+
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[2][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1) && (currentTime - storedTime < timeDelay1+timeDelay2)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[2][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1+timeDelay2){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[0][(i-23)/2]);
+      }
+    }
+  }
+//************************************************************************************************************************
+//************************************************************************************************************************
 
   if(cmd == 3){ // Left
     int timeDelay1 = 130;
@@ -231,6 +293,45 @@ void loop() {
     }
   }
 
+  if(cmd2 == 3){ // Left
+    int timeDelay1 = 130;
+    int timeDelay2 = 140;
+    int timeDelay3 = 100;
+    int timeDelay4 = 120;
+
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[3][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1) && (currentTime - storedTime < timeDelay1+timeDelay2)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[4][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1+timeDelay2)&&(currentTime - storedTime < timeDelay1+timeDelay2+timeDelay3)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[3][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3)&&(currentTime - storedTime < timeDelay1+timeDelay2+timeDelay3+timeDelay4)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[4][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[0][(i-23)/2]);
+      }
+    }
+  }
+//************************************************************************************************************************
+//************************************************************************************************************************
+  
   if(cmd == 0){ // Right
     int timeDelay1 = 160;
     int timeDelay2 = 140;
@@ -268,6 +369,45 @@ void loop() {
     }
   }
 
+  if(cmd2 == 0){ // Right
+    int timeDelay1 = 160;
+    int timeDelay2 = 140;
+    int timeDelay3 = 100;
+    int timeDelay4 = 140;
+
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[4][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1) && (currentTime - storedTime < timeDelay1+timeDelay2)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[3][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1+timeDelay2)&&(currentTime - storedTime < timeDelay1+timeDelay2+timeDelay3)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[4][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3)&&(currentTime - storedTime < timeDelay1+timeDelay2+timeDelay3+timeDelay4)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[3][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[0][(i-23)/2]);
+      }
+    }
+  }
+//************************************************************************************************************************
+//************************************************************************************************************************
+ 
   if(cmd == 4){ // Up
     int timeDelay1 = 160;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
@@ -298,6 +438,38 @@ void loop() {
     }
   }
 
+  if(cmd2 == 4){ // Up
+    int timeDelay1 = 160;
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[6][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[0][(i-23)/2]);
+      }
+    }
+  }
+
+  if(cmd == 5){ // Dive
+    int timeDelay1 = 160;
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[5][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[0][(i-23)/2]);
+      }
+    }
+  }
+//************************************************************************************************************************
+//************************************************************************************************************************
+ 
   if(cmd == 6){ // Keep floating
     int floatInterval1 = 1000;
     int floatInterval2 = 1000;
@@ -309,6 +481,24 @@ void loop() {
     else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[6][(i-23)/2]);
+      }
+    }
+    else{
+      storedFloatTime = currentTime;
+    }
+  }
+
+  if(cmd2 == 6){ // Keep floating
+    int floatInterval1 = 1000;
+    int floatInterval2 = 1000;
+    if((currentTime - storedFloatTime >= 0) && (currentTime - storedFloatTime < floatInterval1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[5][(i-23)/2]);
+      }
+    }
+    else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls2[6][(i-23)/2]);
       }
     }
     else{
