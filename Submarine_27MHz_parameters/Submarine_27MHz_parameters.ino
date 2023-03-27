@@ -5,7 +5,6 @@ int rightPin = 29;
 int divePin = 31;
 int upPin = 33;
 int cmd = 10;
-int PIDinp = 0;
 
 int forwardPin2 = 22;
 int backwardPin2 = 24;
@@ -14,18 +13,6 @@ int rightPin2 = 28;
 int divePin2 = 30;
 int upPin2 = 32;
 int cmd2 = 10;
-
-double kp = 5;
-double ki = 5;
-double kd = 1;
-
-long int actualDistance = 0;
-unsigned long currentTime,currentTimePID, previousTime;
-double elapsedTime;
-double error;
-double lastError;
-double input, output, setPoint;
-double cumError, rateError;
 
 int cmdFlag = 99;
                   // forwardPin,backwardPin,leftPin,rightPin,divePin,upPin
@@ -72,63 +59,19 @@ void setup() {
   for(int i=22; i<=32; i+=2){
         digitalWrite(i,controls[0][(i-22)/2]);
   }
-
-  setPoint = 50;
 }
 
 void loop() {
-  currentTime = millis();
-  currentTimePID = millis();
+  unsigned long currentTime = millis();
   if(Serial.available() > 0){
 //    cmd =  Serial.readStringUntil(' ').toInt();
 //    cmd2 = Serial.readStringUntil('\r').toInt();
-//    cmd = Serial.readStringUntil('\r').toInt();
-    String distance = Serial.readStringUntil('\r');
-    actualDistance = distance.toInt();
+    cmd = Serial.readStringUntil('\r').toInt();
     storedTime = millis();
     storedFloatTime = millis();
-
-    input = actualDistance;
-    output = computePID(input);
-    
-    if(output >= 0){ // Dive
-        int timeDelay1 = output;
-        if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[5][(i-23)/2]);
-          }
-        }
-    
-        if(currentTime - storedTime >= timeDelay1){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[0][(i-23)/2]);
-          }
-        }
-      }
-    else{ // Up
-        int timeDelay1 = output;
-        if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[6][(i-23)/2]);
-          }
-        }
-    
-        if(currentTime - storedTime >= timeDelay1){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[0][(i-23)/2]);
-          }
-        }
-      }
   }
 
-
-
-
-
-
-  
-
-  if(cmd == 10 && actualDistance == 0){ // Stop
+  if(cmd == 10){ // Stop
     for(int i=23; i<=33; i+=2){
       digitalWrite(i,controls[0][(i-23)/2]);
     }
@@ -138,7 +81,7 @@ void loop() {
     int timeDelay1 = 200;
     int timeDelay2 = 100;
     int timeDelay3 = 100;
-    int timeDelay4 = 150;
+    int timeDelay4 = 100;
 
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
@@ -183,7 +126,7 @@ void loop() {
 
     if((currentTime - storedTime >= timeDelay1) && (currentTime - storedTime < timeDelay1+timeDelay2)){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[2][(i-23)/2]);
+        digitalWrite(i,controls[1][(i-23)/2]);
       }
     }
 
@@ -195,10 +138,10 @@ void loop() {
   }
 
   if(cmd == 3){ // Left
-    int timeDelay1 = 130;
-    int timeDelay2 = 140;
-    int timeDelay3 = 100;
-    int timeDelay4 = 120;
+    int timeDelay1 = 150;
+    int timeDelay2 = 100;
+    int timeDelay3 = 130;
+    int timeDelay4 = 100;
 
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
@@ -232,10 +175,10 @@ void loop() {
   }
 
   if(cmd == 0){ // Right
-    int timeDelay1 = 160;
-    int timeDelay2 = 140;
-    int timeDelay3 = 100;
-    int timeDelay4 = 140;
+    int timeDelay1 = 150;
+    int timeDelay2 = 100;
+    int timeDelay3 = 150;
+    int timeDelay4 = 100;
 
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
@@ -316,20 +259,3 @@ void loop() {
     }
   }
 }
-
-
-double computePID(double inp){
-       
-        elapsedTime = (double)(currentTimePID - previousTime);
-
-        error = setPoint - inp;
-        cumError += error * elapsedTime;
-        rateError = (error - lastError)/elapsedTime;
-
-        double out = kp*error + ki*cumError + kd*rateError;
-
-        lastError = error;
-        previousTime = currentTimePID;
-
-        return out;
-  }

@@ -179,15 +179,18 @@ def main():
             height = str(min_area_rect[1][1]).split('.')[0]
             theta1 = str(min_area_rect[2]).split('.')[0]
 
-            if int(center_x) > 720:
-                cX = cX + 0.05*int(center_x)
+            if int(center_x) > 660:
+                cX = cX + 4
+                if int(center_x) > 770:
+                    cX = cX + 7
             elif int(center_x) < 560:
-                cX = cX - 0.05*(1280-int(center_x))
-                
+                cX = cX - 4
+
             if int(center_y) > 600:
-                cY = cY + 0.05 * int(center_y)
+                cX = cX + 3
             elif int(center_y) < 120:
-                cY = cY - 0.05*(720-int(center_y))
+                cY = cY - 3
+
             #
             # if int(width) > 220 and int(height) < 50: #防止检测出长而宽的裂痕
             #     #print("overlap!!")
@@ -294,7 +297,7 @@ def main():
             center_x_real = int((int(center_x)-x_pixel) / conver_x)
             center_y_real = int((int(center_y)-y_pixel) / conver_y)
             center_xy_real = (center_x_real,center_y_real)
-            coordinate = (center,cX,cY)
+            coordinate = (center,"sub center:",cX,cY)
             width_distance = (distance,pref_long,pref_short)
             if plate_type[res_index] == 'black':
                 dataline_black = ("black:",distance)
@@ -317,7 +320,7 @@ def main():
             # cv2.circle(canvas, (cX, cY), 4, (0, 255, 255), -1) # for mass center
             cv2.circle(canvas, (int(center.split(',')[0]), int(center.split(',')[1])), 4, (0, 0, 255), -1)
             # cv2.circle(canvas, (int(x2), int(y2)), 4, (0, 0, 255), -1)
-            cv2.putText(canvas, center, (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(canvas, str(center), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
             cv2.putText(canvas, str(coordinate), (20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
@@ -463,19 +466,19 @@ def main():
 
 
         if counter%5 == 0:
-            if center_x_real < 5 or center_x_real > 58:
-                if yaw_actual > 0:
-                    for i in range(1):
-                        myCmd = str(8)
-                        myCmd = myCmd + '\r'
-                        arduinoData.write(myCmd.encode())
-                        break
-                elif yaw_actual < 0:
-                    for i in range(1):
-                        myCmd = str(9)
-                        myCmd = myCmd + '\r'
-                        arduinoData.write(myCmd.encode())
-                        break
+            # if center_x_real < 5 or center_x_real > 58:
+            #     if yaw_actual > 0:
+            #         for i in range(1):
+            #             myCmd = str(8)
+            #             myCmd = myCmd + '\r'
+            #             arduinoData.write(myCmd.encode())
+            #             break
+            #     elif yaw_actual < 0:
+            #         for i in range(1):
+            #             myCmd = str(9)
+            #             myCmd = myCmd + '\r'
+            #             arduinoData.write(myCmd.encode())
+            #             break
             # center_x_real,center_y_real,yaw_actual
             obs = [[-center_y_real, -center_x_real, yaw_actual2]]
             # if distance < 50:

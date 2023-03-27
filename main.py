@@ -16,6 +16,9 @@ arduinoData = serial.Serial('com3', 115200)
 
 
 def main():
+    center_y_real = 0
+    center_x_real = 0
+    yaw_actual2 = 0
     # configuration
     last_distance = [48, 48, 48]  # blue, yellow, black
     last_yaw = [0, 0, 0]  # blue, yellow, black
@@ -50,7 +53,7 @@ def main():
     upper_blue_hsv = np.array([124, 255, 255])
     # lower_red_hsv = np.array([156, 43, 46])
     # upper_red_hsv = np.array([180, 255, 255])
-    lower_yellow_hsv = np.array([26, 43, 46])
+    lower_yellow_hsv = np.array([11, 43, 46])
     upper_yellow_hsv = np.array([34, 255, 255])
     lower_black_hsv = np.array([0, 0, 46])
     upper_black_hsv = np.array([180, 43, 150])
@@ -110,7 +113,7 @@ def main():
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray1 = gray
         gray1[gray1 > 200] = 255
-        gray1[gray1 < 50] = 0  # 把中间像素转化为黑与白
+        #gray1[gray1 < 10] = 0  # 把中间像素转化为黑与白
         blur = cv2.medianBlur(gray1, 3)  # median blur
         ret, dst = cv2.threshold(blur, 105, 255,
                                  cv2.THRESH_BINARY_INV)  # 与环境有关, can be adjusted 前值越小 越能放噪音 但太小会导致本身轮廓消失
@@ -191,25 +194,25 @@ def main():
             theta1 = str(min_area_rect[2]).split('.')[0]
 
             #error adjustion
-            # if int(center_x) > 760:
-            #     cX = cX + 4
-            # elif int(center_x) < 360:
-            #     cX = cX - 4
-            #
-            # if int(center_y) > 600:
-            #     cY = cY + 2
-            # elif int(center_y) < 120:
-            #     cY = cY - 2
-
-            if int(center_x) > 760:
-                cX = cX + int(equ8(center_x))
+            if int(center_x) > 800:
+                cX = cX + 4
             elif int(center_x) < 360:
-                cX = cX + int(equ8(center_x))
+                cX = cX - 4
 
             if int(center_y) > 600:
-                cY = cY + int(equ9(center_y))
+                cY = cY + 2
             elif int(center_y) < 120:
-                cY = cY + int(equ9(center_y))
+                cY = cY - 2
+
+            # if int(center_x) > 760:
+            #     cX = cX + int(equ8(center_x))
+            # elif int(center_x) < 360:
+            #     cX = cX + int(equ8(center_x))
+            #
+            # if int(center_y) > 600:
+            #     cY = cY + int(equ9(center_y))
+            # elif int(center_y) < 120:
+            #     cY = cY + int(equ9(center_y))
 
             #
             # if int(width) > 220 and int(height) < 50: #防止检测出长而宽的裂痕
@@ -316,12 +319,12 @@ def main():
             center_xy_real = (center_x_real, center_y_real)
             coordinate = (center, cX, cY)
             width_distance = (distance, pref_long, pref_short)
-            if plate_type[res_index] == 'black':
-                dataline_black = ("black:", distance)
-            elif plate_type[res_index] == 'yellow':
-                dataline_yellow = ("yellow:", distance)
-            elif plate_type[res_index] == 'blue':
-                dataline_blue = ("blue:", distance)
+            # if plate_type[res_index] == 'black':
+            #     dataline_black = ("black:", distance)
+            # elif plate_type[res_index] == 'yellow':
+            #     dataline_yellow = ("yellow:", distance)
+            # elif plate_type[res_index] == 'blue':
+            #     dataline_blue = ("blue:", distance)
             compare_wh = (int(distance), int(width), int(height), int(yaw_actual), int(yaw_actual1))
             # print(center_xy_real)
             print(int(distance), ":", center_x, ",", center_y, "(", x_pixel, y_pixel, ")", "(", conver_x, conver_y, ")",
@@ -335,7 +338,7 @@ def main():
             # area_approx = cv2.contourArea(cnt)
             cv2.drawContours(canvas, cnt, -1, (255, 0, 0), 2)  # for object contour
             cv2.drawContours(canvas, [rect_contour], -1, (0, 255, 0), 2)  # for rectagle contour
-            # cv2.circle(canvas, (cX, cY), 4, (0, 255, 255), -1) # for mass center
+            cv2.circle(canvas, (cX, cY), 4, (0, 255, 255), -1) # for mass center
             cv2.circle(canvas, (int(center.split(',')[0]), int(center.split(',')[1])), 4, (0, 0, 255), -1)
             # cv2.circle(canvas, (int(x2), int(y2)), 4, (0, 0, 255), -1)
             cv2.putText(canvas, center, (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
@@ -349,7 +352,7 @@ def main():
             #                 2)
             # cv2.putText(canvas, str(dataline_black), (60, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
-            cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
+            #cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
 
             # cv2.arrowedLine(canvas, (70, 70), (1000, 70), color=(0, 255, 0), thickness=2, line_type=8, shift=0,
             #                tipLength=0.05)
@@ -478,37 +481,21 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
-        if counter % 5 == 0:
-            if center_x_real < 5 or center_x_real > 58:
-                if yaw_actual > 0:
-                    for i in range(1):
-                        myCmd = str(8)
-                        myCmd = myCmd + '\r'
-                        arduinoData.write(myCmd.encode())
-                        break
-                elif yaw_actual < 0:
-                    for i in range(1):
-                        myCmd = str(9)
-                        myCmd = myCmd + '\r'
-                        arduinoData.write(myCmd.encode())
-                        break
-            # center_x_real,center_y_real,yaw_actual
-            obs = [[-center_y_real, -center_x_real, yaw_actual2]]
-            # if distance < 50:
-            #     myCmd = str(5)
-            #     myCmd = myCmd + '\r'
-            #     arduinoData.write(myCmd.encode())
-            # elif distance > 60:
-            #     myCmd = str(4)
-            #     myCmd = myCmd + '\r'
-            #     arduinoData.write(myCmd.encode())
 
-            action = model.predict(obs)
-            print("{}".format(action))
-            myCmd = str(action[0])
-            # print("action: {}".format(cmd))
-            myCmd = myCmd + '\r'
-            arduinoData.write(myCmd.encode())
+
+
+        if counter % 5 == 0:
+            obs = [[-center_y_real, -center_x_real, yaw_actual2]]
+            PIDinp = str(distance) + '\r'
+            arduinoData.write(PIDinp.encode())
+
+
+            # action = model.predict(obs)
+            # print("{}".format(action))
+            # myCmd = str(action[0])
+            # # print("action: {}".format(cmd))
+            # myCmd = myCmd + '\r'
+            # arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()
