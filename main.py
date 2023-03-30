@@ -485,16 +485,24 @@ def main():
 
 
         if counter % 5 == 0:
+            print(distance)
             obs = [[-center_y_real, -center_x_real, yaw_actual2]]
             PIDinp = str(distance)
             action = model.predict(obs)
-
             print("{}".format(action))
-
-            myCmd = str(action[0]) + PIDinp
-            # print("action: {}".format(cmd))
-            myCmd = myCmd + '\r'
-            arduinoData.write(myCmd.encode())
+            # myCmd = myCmd +' ' + PIDinp + '\r'
+            if distance < 50:
+                myCmd = str(5)
+                myCmd = myCmd + '\r'
+                arduinoData.write(myCmd.encode())
+            elif distance >= 50 and distance < 60:
+                myCmd = str(action[0])
+                myCmd = myCmd + '\r'
+                arduinoData.write(myCmd.encode())
+            elif distance >= 60:
+                myCmd = str(4)
+                myCmd = myCmd + '\r'
+                arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()

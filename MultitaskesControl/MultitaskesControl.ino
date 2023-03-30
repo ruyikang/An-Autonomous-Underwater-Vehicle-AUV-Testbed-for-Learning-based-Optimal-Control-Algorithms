@@ -82,57 +82,30 @@ void loop() {
   // Receive signal data from Pyton terminal
   if(Serial.available() > 0){
     cmd =  Serial.readStringUntil(' ').toInt();
-    actualDistance = Serial.readStringUntil('\r').toInt();
+    cmd2 = Serial.readStringUntil('\r').toInt();
+//    actualDistance = Serial.readStringUntil('\r').toInt();
     storedTime = millis();
     storedFloatTime = millis();
-
-    input = actualDistance;
-    output = computePID(input);
     }
 
-  // PID floting algorithm:
-  if(output >= 0){ // Dive
-        int timeDelay1 = output;
-        if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[5][(i-23)/2]);
-          }
-        }
-    
-        if(currentTime - storedTime >= timeDelay1){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[0][(i-23)/2]);
-          }
-        }
-      }
-    else{ // Up
-        int timeDelay1 = output;
-        if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[6][(i-23)/2]);
-          }
-        }
-    
-        if(currentTime - storedTime >= timeDelay1){
-          for(int i=23; i<=33; i+=2){
-            digitalWrite(i,controls[0][(i-23)/2]);
-          }
-        }
-      }
-
-
-
+//  // PID floting algorithm:
 
 
 
   
   // Basic operating
-  if(cmd == 10 && actualDistance == 0){ // Stop
+  if(cmd == 10){ // Stop
     for(int i=23; i<=33; i+=2){
       digitalWrite(i,controls[0][(i-23)/2]);
     }
   }
 
+  if(cmd2 == 10){ // Stop
+    for(int i=23; i<=33; i+=2){
+      digitalWrite(i,controls2[0][(i-23)/2]);
+    }
+  }
+  
   if(cmd == 2){ // Forward
     int timeDelay1 = 200;
     int timeDelay2 = 100;
@@ -409,7 +382,7 @@ void loop() {
 //************************************************************************************************************************
  
   if(cmd == 4){ // Up
-    int timeDelay1 = 160;
+    int timeDelay1 = 200;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[6][(i-23)/2]);
@@ -424,7 +397,7 @@ void loop() {
   }
 
   if(cmd == 5){ // Dive
-    int timeDelay1 = 160;
+    int timeDelay1 = 200;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[5][(i-23)/2]);
@@ -439,7 +412,7 @@ void loop() {
   }
 
   if(cmd2 == 4){ // Up
-    int timeDelay1 = 160;
+    int timeDelay1 = 500;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls2[6][(i-23)/2]);
@@ -453,7 +426,7 @@ void loop() {
     }
   }
 
-  if(cmd == 5){ // Dive
+  if(cmd2 == 5){ // Dive
     int timeDelay1 = 160;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
