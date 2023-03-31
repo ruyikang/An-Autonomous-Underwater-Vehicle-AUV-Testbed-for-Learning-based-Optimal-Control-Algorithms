@@ -8,7 +8,7 @@ import cvzone
 
 import joblib
 
-model = joblib.load(r"DTC_task1_v4.pkl")
+model = joblib.load(r"DTC_task2_v2.pkl")
 
 import serial
 
@@ -16,6 +16,8 @@ arduinoData = serial.Serial('com3', 115200)
 
 
 def main():
+    last_x_real = [0,0,0]
+    last_y_real = [0,0,0]
     center_y_real = 0
     center_x_real = 0
     yaw_actual2 = 0
@@ -327,8 +329,8 @@ def main():
             #     dataline_blue = ("blue:", distance)
             compare_wh = (int(distance), int(width), int(height), int(yaw_actual), int(yaw_actual1))
             # print(center_xy_real)
-            print(int(distance), ":", center_x, ",", center_y, "(", x_pixel, y_pixel, ")", "(", conver_x, conver_y, ")",
-                  pref_long, ",", center_x_real, ",", center_y_real, ",", yaw_actual)
+            # print(int(distance), ":", center_x, ",", center_y, "(", x_pixel, y_pixel, ")", "(", conver_x, conver_y, ")",
+            #       pref_long, ",", center_x_real, ",", center_y_real, ",", yaw_actual)
             # print(compare_wh)
             # distance = A*w**2+B*w+C
             # print(distance,"cm",pref) # use shorter length
@@ -464,15 +466,21 @@ def main():
                 # 前后左右速度和力
 
             # finally store the value of distance
-            if plate_type[res_index] == 'black':
+            if plate_type[res_index] == 'blue':
+                last_x_real[0] = center_x_real
+                last_y_real[0] = center_y_real
                 last_distance[0] = distance
-                last_yaw[0] = yaw_actual
+                last_yaw[0] = yaw_actual2
             elif plate_type[res_index] == 'yellow':
+                last_x_real[1] = center_x_real
+                last_y_real[1] = center_y_real
                 last_distance[1] = distance
-                last_yaw[1] = yaw_actual
+                last_yaw[1] = yaw_actual2
             elif plate_type[res_index] == 'black':
+                last_x_real[2] = center_x_real
+                last_y_real[2] = center_y_real
                 last_distance[2] = distance
-                last_yaw[2] = yaw_actual
+                last_yaw[2] = yaw_actual2
             # print("center = ","(",center,")","yaw = ",yaw_actual,"°") #x,y,yaw
         # cv2.namedWindow("Camera", 0)
         # cv2.resizeWindow("Camera", 1280,720)
@@ -485,24 +493,38 @@ def main():
 
 
         if counter % 5 == 0:
-            print(distance)
-            obs = [[-center_y_real, -center_x_real, yaw_actual2]]
-            PIDinp = str(distance)
-            action = model.predict(obs)
-            print("{}".format(action))
+            # print(distance)
+            obs_blue = [[-last_y_real[0], -last_x_real[0], last_yaw[0]]]
+            obs_black = [[-last_y_real[2], -last_x_real[2], last_yaw[2]]]
+            # PIDinp = str(distance)
+            action = model.predict(obs_blue)
+            action_blue = action[0][0]
+            action = model.predict(obs_black)
+            action_black = action[0][1]
+
+            # print("{}".format(obs_blue))
+            # print("{}".format(action_blue))
+            print("{}".format(obs_black))
+            print("{}".format(action_black))
+
+            myCmd = str(action_black) #+ ' ' + str(action_black) + '\r'
+            myCmd = myCmd + '\r'
+            arduinoData.write(myCmd.encode())
+
+            # print("{}".format(action))
             # myCmd = myCmd +' ' + PIDinp + '\r'
-            if distance < 50:
-                myCmd = str(5)
-                myCmd = myCmd + '\r'
-                arduinoData.write(myCmd.encode())
-            elif distance >= 50 and distance < 60:
-                myCmd = str(action[0])
-                myCmd = myCmd + '\r'
-                arduinoData.write(myCmd.encode())
-            elif distance >= 60:
-                myCmd = str(4)
-                myCmd = myCmd + '\r'
-                arduinoData.write(myCmd.encode())
+            # if distance < 50:
+            #     myCmd = str(5)
+            #     myCmd = myCmd + '\r'
+            #     arduinoData.write(myCmd.encode())
+            # elif distance >= 50 and distance < 60:
+            #     myCmd = str(action[0])
+            #     myCmd = myCmd + '\r'
+            #     arduinoData.write(myCmd.encode())
+            # elif distance >= 60:
+            #     myCmd = str(4)
+            #     myCmd = myCmd + '\r'
+            #     arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()
