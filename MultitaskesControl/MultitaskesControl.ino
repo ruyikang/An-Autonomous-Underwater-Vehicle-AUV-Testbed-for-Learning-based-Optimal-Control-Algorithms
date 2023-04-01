@@ -57,7 +57,7 @@ void setup() {
   }
 
   for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[5][(i-23)/2]);
   }
 
 //  Setup of pins for Submarine 2 (27MHz)
@@ -66,7 +66,7 @@ void setup() {
   }
 
   for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[5][(i-22)/2]);
   }
 }
 
@@ -96,10 +96,10 @@ void loop() {
   }
   
   if(cmd == 2){ // Forward
-    int timeDelay1 = 200;
+    int timeDelay1 = 400;
     int timeDelay2 = 100;
     int timeDelay3 = 100;
-    int timeDelay4 = 150;
+    int timeDelay4 = 100;
 
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
@@ -127,7 +127,7 @@ void loop() {
 
     if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
   }
@@ -164,7 +164,7 @@ void loop() {
 
     if(currentTime - storedTime2 >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[5][(i-22)/2]);
       }
     }
   }
@@ -188,7 +188,7 @@ void loop() {
 
     if(currentTime - storedTime >= timeDelay1+timeDelay2){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
   }
@@ -211,7 +211,7 @@ void loop() {
 
     if(currentTime - storedTime2 >= timeDelay1+timeDelay2){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[5][(i-22)/2]);
       }
     }
   }
@@ -219,8 +219,8 @@ void loop() {
 //************************************************************************************************************************
 
   if(cmd == 3){ // Left
-    int timeDelay1 = 130;
-    int timeDelay2 = 140;
+    int timeDelay1 = 160;
+    int timeDelay2 = 120;
     int timeDelay3 = 100;
     int timeDelay4 = 120;
 
@@ -250,7 +250,7 @@ void loop() {
 
     if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
   }
@@ -287,7 +287,7 @@ void loop() {
 
     if(currentTime - storedTime2 >= timeDelay1_sub2+timeDelay2_sub2+timeDelay3_sub2+timeDelay4_sub2){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[5][(i-22)/2]);
       }
     }
   }
@@ -295,10 +295,10 @@ void loop() {
 //************************************************************************************************************************
   
   if(cmd == 0){ // Right
-    int timeDelay1 = 160;
-    int timeDelay2 = 140;
+    int timeDelay1 = 180;
+    int timeDelay2 = 120;
     int timeDelay3 = 100;
-    int timeDelay4 = 140;
+    int timeDelay4 = 120;
 
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
@@ -326,7 +326,7 @@ void loop() {
 
     if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
   }
@@ -363,7 +363,7 @@ void loop() {
 
     if(currentTime - storedTime2 >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[5][(i-22)/2]);
       }
     }
   }

@@ -8,7 +8,7 @@ import cvzone
 
 import joblib
 
-model = joblib.load(r"DTC_task2_v2.pkl")
+model = joblib.load(r"DTC_task2_v4.pkl")
 
 import serial
 
@@ -507,8 +507,7 @@ def main():
             print("{}".format(obs_black))
             print("{}".format(action_black))
 
-            myCmd = str(action_black) #+ ' ' + str(action_black) + '\r'
-            myCmd = myCmd + '\r'
+            myCmd = str(action_blue) + ' ' + str(action_black) + '\r'
             arduinoData.write(myCmd.encode())
 
             # print("{}".format(action))
