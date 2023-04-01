@@ -146,7 +146,7 @@ void loop() {
 
     if((currentTime - storedTime2 >= timeDelay1) && (currentTime - storedTime2 < timeDelay1+timeDelay2)){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[2][(i-22)/2]);
       }
     }
 
@@ -158,7 +158,7 @@ void loop() {
 
     if((currentTime - storedTime2 >= timeDelay1+timeDelay2+timeDelay3)&&(currentTime - storedTime2 < timeDelay1+timeDelay2+timeDelay3+timeDelay4)){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[2][(i-22)/2]);
       }
     }
 
@@ -194,7 +194,7 @@ void loop() {
   }
 
   if(cmd2 == 1){ // Backward
-    int timeDelay1 = 300;
+    int timeDelay1 = 400;
     int timeDelay2 = 200;
 
     if((currentTime - storedTime2 >= 0) && (currentTime - storedTime2 < timeDelay1)){
@@ -205,7 +205,7 @@ void loop() {
 
     if((currentTime - storedTime2 >= timeDelay1) && (currentTime - storedTime2 < timeDelay1+timeDelay2)){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[2][(i-22)/2]);
+        digitalWrite(i,controls2[1][(i-22)/2]);
       }
     }
 
@@ -256,10 +256,10 @@ void loop() {
   }
 
   if(cmd2 == 3){ // Left
-    int timeDelay1_sub2 = 130;
+    int timeDelay1_sub2 = 160;
     int timeDelay2_sub2 = 100;
-    int timeDelay3_sub2 = 0;
-    int timeDelay4_sub2 = 0;
+    int timeDelay3_sub2 = 160;
+    int timeDelay4_sub2 = 120;
 
     if((currentTime - storedTime2 >= 0) && (currentTime - storedTime2 < timeDelay1_sub2)){
       for(int i=22; i<=32; i+=2){
@@ -332,10 +332,10 @@ void loop() {
   }
 
   if(cmd2 == 0){ // Right
-    int timeDelay1 = 160;
-    int timeDelay2 = 100;
-    int timeDelay3 = 120;
-    int timeDelay4 = 100;
+    int timeDelay1 = 180;
+    int timeDelay2 = 150;
+    int timeDelay3 = 180;
+    int timeDelay4 = 150;
 
     if((currentTime - storedTime2 >= 0) && (currentTime - storedTime2 < timeDelay1)){
       for(int i=22; i<=32; i+=2){
