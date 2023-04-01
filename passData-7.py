@@ -15,7 +15,7 @@ while True:
     for i in range (downNum):
         # time.sleep(0.9)
         # myCmd = input("cmd=")
-        myCmd = str(3)
+        myCmd = str(3) + ' ' + str(3)
         myCmd = myCmd + '\r'
         arduinoData.write(myCmd.encode())
         time.sleep(1)
