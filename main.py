@@ -8,7 +8,7 @@ import cvzone
 
 import joblib
 
-model = joblib.load(r"DTC_task2_v4.pkl")
+model = joblib.load(r"DTC_task2_v6.pkl")
 
 import serial
 
@@ -16,6 +16,7 @@ arduinoData = serial.Serial('com3', 115200)
 
 
 def main():
+    state = 0
     last_x_real = [0,0,0]
     last_y_real = [0,0,0]
     center_y_real = 0
@@ -24,6 +25,8 @@ def main():
     # configuration
     last_distance = [48, 48, 48]  # blue, yellow, black
     last_yaw = [0, 0, 0]  # blue, yellow, black
+    record_yaw_blue = np.array([0,0,0,0,0])
+    record_yaw_black = np.array([0,0,0,0,0])
     pref_long = 0  # long pixel for contour
     pref_short = 0  # short pixel for contour
     plate_type = ["blue", "yellow", "black"]
@@ -115,7 +118,7 @@ def main():
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray1 = gray
         gray1[gray1 > 200] = 255
-        #gray1[gray1 < 10] = 0  # 把中间像素转化为黑与白
+        gray1[gray1 < 100] = 0  # 把中间像素转化为黑与白
         blur = cv2.medianBlur(gray1, 3)  # median blur
         ret, dst = cv2.threshold(blur, 105, 255,
                                  cv2.THRESH_BINARY_INV)  # 与环境有关, can be adjusted 前值越小 越能放噪音 但太小会导致本身轮廓消失
@@ -197,14 +200,14 @@ def main():
 
             #error adjustion
             if int(center_x) > 800:
-                cX = cX + 4
+                cX = cX + 2
             elif int(center_x) < 360:
-                cX = cX - 4
+                cX = cX - 2
 
             if int(center_y) > 600:
-                cY = cY + 2
+                cY = cY + 1
             elif int(center_y) < 120:
-                cY = cY - 2
+                cY = cY - 1
 
             # if int(center_x) > 760:
             #     cX = cX + int(equ8(center_x))
@@ -328,6 +331,7 @@ def main():
             # elif plate_type[res_index] == 'blue':
             #     dataline_blue = ("blue:", distance)
             compare_wh = (int(distance), int(width), int(height), int(yaw_actual), int(yaw_actual1))
+
             # print(center_xy_real)
             # print(int(distance), ":", center_x, ",", center_y, "(", x_pixel, y_pixel, ")", "(", conver_x, conver_y, ")",
             #       pref_long, ",", center_x_real, ",", center_y_real, ",", yaw_actual)
@@ -344,6 +348,7 @@ def main():
             cv2.circle(canvas, (int(center.split(',')[0]), int(center.split(',')[1])), 4, (0, 0, 255), -1)
             # cv2.circle(canvas, (int(x2), int(y2)), 4, (0, 0, 255), -1)
             cv2.putText(canvas, center, (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
             cv2.putText(canvas, str(coordinate), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
@@ -450,7 +455,7 @@ def main():
                 yaw_actual2 = -90
             else:
                 yaw_actual2 = -90 - yaw_actual
-
+            cv2.putText(canvas, str(yaw_actual), (cX + 20, cY + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             log = open('data.txt', mode='a', encoding='utf-8')
             if keyboard.is_pressed('t'):
                 switch = 1  # choose if you want to record data
@@ -470,6 +475,7 @@ def main():
                 last_x_real[0] = center_x_real
                 last_y_real[0] = center_y_real
                 last_distance[0] = distance
+                record_yaw_blue[counter % 5] = yaw_actual2
                 last_yaw[0] = yaw_actual2
             elif plate_type[res_index] == 'yellow':
                 last_x_real[1] = center_x_real
@@ -480,7 +486,9 @@ def main():
                 last_x_real[2] = center_x_real
                 last_y_real[2] = center_y_real
                 last_distance[2] = distance
+                record_yaw_black[counter % 5] = yaw_actual2
                 last_yaw[2] = yaw_actual2
+
             # print("center = ","(",center,")","yaw = ",yaw_actual,"°") #x,y,yaw
         # cv2.namedWindow("Camera", 0)
         # cv2.resizeWindow("Camera", 1280,720)
@@ -489,41 +497,29 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
+        if keyboard.is_pressed('s'):
+            state = 1
 
-
-
-        if counter % 5 == 0:
+        if counter % 5 == 0 and state == 1:
             # print(distance)
-            obs_blue = [[-last_y_real[0], -last_x_real[0], last_yaw[0]]]
-            obs_black = [[-last_y_real[2], -last_x_real[2], last_yaw[2]]]
-            # PIDinp = str(distance)
+            yaw_actual_blue = np.median(record_yaw_blue)
+            yaw_actual_black = np.median(record_yaw_black)
+            obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_blue]]
+            obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_black]]
+            # obs_blue = [[-last_y_real[0], -last_x_real[0], last_yaw[0]]]
+            # obs_black = [[-last_y_real[2], -last_x_real[2], last_yaw[2]]]
+
             action = model.predict(obs_blue)
             action_blue = action[0][0]
             action = model.predict(obs_black)
             action_black = action[0][1]
-
-            # print("{}".format(obs_blue))
-            # print("{}".format(action_blue))
             print("{}".format(obs_black))
-            print("{}".format(action_black))
+            print("Black:{}".format(action_black))
+            print("{}".format(obs_blue))
+            print("Blue:{}".format(action_blue))
 
             myCmd = str(action_blue) + ' ' + str(action_black) + '\r'
             arduinoData.write(myCmd.encode())
-
-            # print("{}".format(action))
-            # myCmd = myCmd +' ' + PIDinp + '\r'
-            # if distance < 50:
-            #     myCmd = str(5)
-            #     myCmd = myCmd + '\r'
-            #     arduinoData.write(myCmd.encode())
-            # elif distance >= 50 and distance < 60:
-            #     myCmd = str(action[0])
-            #     myCmd = myCmd + '\r'
-            #     arduinoData.write(myCmd.encode())
-            # elif distance >= 60:
-            #     myCmd = str(4)
-            #     myCmd = myCmd + '\r'
-            #     arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()
