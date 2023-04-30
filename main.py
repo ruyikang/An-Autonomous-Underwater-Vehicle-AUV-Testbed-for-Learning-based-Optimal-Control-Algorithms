@@ -351,15 +351,15 @@ def main():
 
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
-            cv2.putText(canvas, str(coordinate), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                        2)
+            #cv2.putText(canvas, str(coordinate), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+            #            2)
             # #cv2.putText(canvas, str(dataline_blue), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
             # cv2.putText(canvas, str(dataline_yellow), (40, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
             # cv2.putText(canvas, str(dataline_black), (60, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
-            #cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
+            cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
 
             # cv2.arrowedLine(canvas, (70, 70), (1000, 70), color=(0, 255, 0), thickness=2, line_type=8, shift=0,
             #                tipLength=0.05)
@@ -398,7 +398,7 @@ def main():
 
             if (cX > int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在右下，矩阵中心在左上,方向左上
                 # print("重心右下，中心左上")
-                cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                # cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             2)
                 yaw_actual1 = int(theta1) - 180
                 if yaw_actual > 0:
@@ -409,7 +409,7 @@ def main():
                 # , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX > int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):  # 重心在右上，矩阵中心在左下
                 # print("重心右上，中心左下")
-                cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                # cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             2)
                 yaw_actual1 = int(theta1) + 90
                 if yaw_actual < 0:
@@ -420,14 +420,14 @@ def main():
                 #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
                 # `print`("重心左下，中心右上")
-                cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                # cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             2)
                 yaw_actual1 = int(theta1) - 90
                 # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
                 #               , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):
                 # print("重心左上，中心右下")
-                cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                # cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             2)
                 yaw_actual1 = int(theta1)
 
