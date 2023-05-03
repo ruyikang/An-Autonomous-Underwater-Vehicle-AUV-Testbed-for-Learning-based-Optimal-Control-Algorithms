@@ -168,9 +168,9 @@ def map_action_to_button(action):
     elif np.array_equal(nparray, np.array([0., -1., 1.])):
         return 3  # left
     elif np.array_equal(nparray, np.array([1., 1., -1.])):
-        return 7  # forward+right
+        return 7  # forward+left
     elif np.array_equal(nparray, np.array([1., -1., 1.])):
-        return 6  # forward+left
+        return 6  # forward+right
     elif np.array_equal(nparray, np.array([-1., 1., -1.])):
         return 8  # back+right
     elif np.array_equal(nparray, np.array([-1., -1., 1.])):
