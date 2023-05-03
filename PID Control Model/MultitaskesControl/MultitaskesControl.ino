@@ -28,13 +28,17 @@ double input, output, setPoint;
 double cumError, rateError;
 int cmdFlag = 99;
                   // forwardPin,backwardPin,leftPin,rightPin,divePin,upPin
-int controls[7][6] = {{1,0,1,0,1,0}, // Stop d = 0
+int controls[11][6] = {{1,0,1,0,1,0}, // Stop d = 0
                       {0,0,1,0,1,0}, // Forward d = 1
                       {1,1,1,0,1,0}, // Backward d = 2
                       {1,0,0,0,1,0}, // Left d = 3
                       {1,0,1,1,1,0}, // Right d = 4
                       {1,0,1,0,0,0}, // Dive d = 5
                       {1,0,1,0,1,1}, // Up d = 6
+                      {0,0,1,1,1,0}, // Forward + Right d = 7
+                      {0,0,0,0,1,0}, // Forward + Left d = 8
+                      {1,1,1,1,1,0}, // Back + Right d = 9
+                      {1,1,0,0,1,0}  // Back + Left d = 10
                       };
 int controls2[7][6] = {{1,0,1,0,1,0}, // Stop d = 0
                       {0,0,1,0,1,0}, // Forward d = 1
@@ -67,8 +71,8 @@ void loop() {
   
   // Receive signal data from Pyton terminal
   if(Serial.available() > 0){
-    cmd = Serial.readStringUntil(' ').toInt();
-    cmd2 =  Serial.readStringUntil('\r').toInt();
+    cmd = Serial.readStringUntil('\r').toInt();
+    cmd2 =  10;
     storedTime = millis();
     storedTime2 = millis();
     }
@@ -119,7 +123,7 @@ void loop() {
 
     if(currentTime - storedTime >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
   }
@@ -156,7 +160,7 @@ void loop() {
 
     if(currentTime - storedTime2 >= timeDelay1+timeDelay2+timeDelay3+timeDelay4){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[5][(i-22)/2]);
       }
     }
   }
@@ -431,39 +435,79 @@ void loop() {
 //************************************************************************************************************************
 //************************************************************************************************************************
  
-  if(cmd == 6){ // Keep floating
-    int floatInterval1 = 1000;
-    int floatInterval2 = 1000;
-    if((currentTime - storedFloatTime >= 0) && (currentTime - storedFloatTime < floatInterval1)){
+  if(cmd == 6){ // Forward + Right
+    int timeDelay1_forward = 500;
+    int timeDelay1_turn = 200;
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1_turn)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[7][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1_turn) && (currentTime - storedTime < timeDelay1_forward)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[1][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1_forward){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[5][(i-23)/2]);
+      }
+    }   
+  }
+
+  if(cmd == 7){ // Forward + Left
+    int timeDelay1_forward = 500;
+    int timeDelay1_turn = 200;
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1_turn)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[8][(i-23)/2]);
+      }
+    }
+
+    if((currentTime - storedTime >= timeDelay1_turn) && (currentTime - storedTime < timeDelay1_forward)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[1][(i-23)/2]);
+      }
+    }
+
+    if(currentTime - storedTime >= timeDelay1_forward){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
-    else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
+  }
+
+
+  if(cmd == 8){ // Forward + Right
+    int timeDelay1 = 500;
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[6][(i-23)/2]);
+        digitalWrite(i,controls[9][(i-23)/2]);
       }
     }
-    else{
-      storedFloatTime = currentTime;
+
+    if(currentTime - storedTime2 >= timeDelay1){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[5][(i-23)/2]);
+      }
     }
   }
 
-  if(cmd2 == 6){ // Keep floating
-    int floatInterval1 = 1000;
-    int floatInterval2 = 1000;
-    if((currentTime - storedFloatTime >= 0) && (currentTime - storedFloatTime < floatInterval1)){
-      for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[5][(i-22)/2]);
+  
+  if(cmd == 9){ // Forward + Right
+    int timeDelay1 = 500;
+    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[10][(i-23)/2]);
       }
     }
-    else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
-      for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[6][(i-22)/2]);
+
+    if(currentTime - storedTime2 >= timeDelay1){
+      for(int i=23; i<=33; i+=2){
+        digitalWrite(i,controls[5][(i-23)/2]);
       }
-    }
-    else{
-      storedFloatTime = currentTime;
     }
   }
 }

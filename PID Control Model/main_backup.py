@@ -5,10 +5,8 @@ import math
 import keyboard
 import time
 import cvzone
+from PIDController_hardware import PID_Controller
 
-import joblib
-
-model = joblib.load(r"DTC_task2_v6.pkl")
 
 import serial
 
@@ -38,6 +36,12 @@ def main():
     dataline_yellow = (0, 0)
     dataline_black = (0, 0)
 
+    # PID Parameters
+    goal_indx = 0
+    last_error_dis = 0
+    last_integral_dis = 0
+    last_error_yaw = 0
+    last_integral_yaw = 0
     topwater = 48  # 顶部（潜艇付出水面） #actually 48    # 水深23cm 从48-72cm 但submarine高5cm，所以深度为67cm
     # cap = cv2.VideoCapture(1) # for macbook
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # open 1080hp camera (0), computer camera is (1)
@@ -351,7 +355,7 @@ def main():
 
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
-            cv2.putText(canvas, str(coordinate), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+            cv2.putText(canvas, str(timestamp[0:8]), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
             # #cv2.putText(canvas, str(dataline_blue), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
@@ -359,7 +363,7 @@ def main():
             #                 2)
             # cv2.putText(canvas, str(dataline_black), (60, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
-            #cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
+            cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
 
             # cv2.arrowedLine(canvas, (70, 70), (1000, 70), color=(0, 255, 0), thickness=2, line_type=8, shift=0,
             #                tipLength=0.05)
@@ -398,8 +402,8 @@ def main():
 
             if (cX > int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在右下，矩阵中心在左上,方向左上
                 # print("重心右下，中心左上")
-                cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                #            2)
                 yaw_actual1 = int(theta1) - 180
                 if yaw_actual > 0:
                     yaw_actual = yaw_actual - 180
@@ -409,8 +413,8 @@ def main():
                 # , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX > int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):  # 重心在右上，矩阵中心在左下
                 # print("重心右上，中心左下")
-                cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                #            2)
                 yaw_actual1 = int(theta1) + 90
                 if yaw_actual < 0:
                     yaw_actual = yaw_actual + 180
@@ -420,15 +424,15 @@ def main():
                 #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
                 # `print`("重心左下，中心右上")
-                cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                #            2)
                 yaw_actual1 = int(theta1) - 90
                 # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
                 #               , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):
                 # print("重心左上，中心右下")
-                cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                #           2)
                 yaw_actual1 = int(theta1)
 
             else:
@@ -455,7 +459,8 @@ def main():
                 yaw_actual2 = -90
             else:
                 yaw_actual2 = -90 - yaw_actual
-            cv2.putText(canvas, str(yaw_actual), (cX + 20, cY + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            yaw_actual_print = round(yaw_actual,2)
+            cv2.putText(canvas, str(yaw_actual_print), (cX + 20, cY + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
             log = open('data.txt', mode='a', encoding='utf-8')
             if keyboard.is_pressed('t'):
                 switch = 1  # choose if you want to record data
@@ -504,27 +509,23 @@ def main():
             # print(distance)
             yaw_actual_blue = np.median(record_yaw_blue)
             yaw_actual_black = np.median(record_yaw_black)
-            obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_blue]]
+            #obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_blue]]
+            obs_blue = [[last_x_real[0], last_y_real[0], yaw_actual1]]
             obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_black]]
-            # obs_blue = [[-last_y_real[0], -last_x_real[0], last_yaw[0]]]
-            # obs_black = [[-last_y_real[2], -last_x_real[2], last_yaw[2]]]
-
-            action = model.predict(obs_blue)
-            action_blue = action[0][0]
-            action = model.predict(obs_black)
-            action_black = action[0][1]
-            print("{}".format(obs_black))
-            print("Black:{}".format(action_black))
-            print("{}".format(obs_blue))
-            print("Blue:{}".format(action_blue))
-
-            myCmd = str(action_blue) + ' ' + str(action_black) + '\r'
+            button, goal_indx, error_dis, error_yaw, integral_dis, integral_yaw = PID_Controller(-last_x_real[0]/100, -last_y_real[0]/100, yaw_actual_blue * math.pi/180, goal_indx, last_error_dis, last_integral_dis, last_error_yaw, last_integral_yaw)
+            last_error_yaw = error_yaw
+            last_integral_yaw = integral_yaw
+            last_error_dis = error_dis
+            last_integral_dis = integral_dis
+            print("test output")
+            print("button:{}".format(button))
+            
+            myCmd = str(button) + '\r'
             arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()
     # print(record_x, record_y, '', x2, y2,'',x,y)
-
 
 if __name__ == '__main__':
     main()
