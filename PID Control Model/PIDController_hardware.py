@@ -3,29 +3,35 @@
 import numpy as np
 import math
 
-def PID_Controller(x,y,yaw,i,last_error_dis,last_integral_dis,last_error_yaw,last_integral_yaw):
+def PID_Controller(x,y,yaw,i,last_error_dis,last_integral_dis,last_error_yaw,last_integral_yaw,last_current_yaw):
+
 
     goal1 = np.array([0.2, 0.3])
     goal2 = np.array([0.3, 0.3])
     goal3 = np.array([0.4, 0.3])
-    goal4 = np.array([0.4, 0.1])
-    goal = [goal1, goal2, goal3, goal4]
+    goal4 = np.array([0.5, 0.2])
+    goal5 = np.array([100,100])   # no sense, for stopping at goal4
+    goal = [goal1, goal2, goal3, goal4, goal5]
 
-    if check_dist_goal(x,y,goal[i][0],goal[i][1]) and check_angle_goal(x,y,goal[i][0],goal[i][1],yaw):
+    real_yaw, last_current_yaw = calculate_current_yaw(yaw,last_current_yaw)
+
+    if check_dist_goal(x,y,goal[i][0],goal[i][1]) and check_angle_goal(x,y,goal[i][0],goal[i][1],real_yaw):
         i=i+1
 
     des_yaw = math.atan2(goal[i][1] - y, goal[i][0] - x)
     des_distance = 0.0
 
     distance = math.sqrt(
-        (x - goal[i][0]) * (x - goal[i][0]) + (y - goal[i][1]) * (y - goal[i][1])
-    )
+            (x - goal[i][0]) * (x - goal[i][0]) + (y - goal[i][1]) * (y - goal[i][1])
+        )
+
+
 
     print("des_yaw: ", des_yaw)
     print("distance: ", distance)
     print("x: ", x)
     print("y: ", y)
-    print("yaw: ", yaw)
+    print("yaw: ", real_yaw)
 
     #button, i, error_dis, error_yaw,intergal_dis, intergal_yaw = PID_Controller(x,y,yaw,i,last_error_dis,last_integral_dis,last_error_yaw,last_integral_yaw):
     #output, error,integral = PIDcontroller(Kp, Ki, Kd, setpoint, process_value,last_integral,last_error):
@@ -33,12 +39,12 @@ def PID_Controller(x,y,yaw,i,last_error_dis,last_integral_dis,last_error_yaw,las
 
     #output1
     controller_yaw, error_yaw,integral_yaw= PIDcontroller(
-        Kp=40.0, Ki=0.0, Kd=0.0, setpoint=des_yaw, process_value = yaw,last_integral=last_integral_yaw,last_error=last_error_yaw)
+        Kp=40.0, Ki=0.0, Kd=0.0, setpoint=des_yaw, process_value = real_yaw,last_integral=last_integral_yaw,last_error=last_error_yaw)
     #output2
     controller_distance, error_dis,integral_dis = PIDcontroller(
         Kp=8.0, Ki=0.0, Kd=1.0, setpoint=des_distance, process_value = distance,last_integral=last_integral_dis,last_error=last_error_dis)
-    print("x: ", x)
-    print("y: ", y)
+    #print("x: ", x)
+    #print("y: ", y)
     print("goal x: ", goal[i][0])
     print("goal y: ", goal[i][1])
 
@@ -55,7 +61,21 @@ def PID_Controller(x,y,yaw,i,last_error_dis,last_integral_dis,last_error_yaw,las
     print("the difference of distance: ", controller_distance)
     button = action(controller_yaw, controller_distance)
 
-    return button, i, error_dis, error_yaw, integral_dis,integral_yaw
+    return button, i, error_dis, error_yaw, integral_dis,integral_yaw, last_current_yaw
+
+def calculate_current_yaw(current_yaw, last_current_yaw):
+    count_current = 0
+    delta_current_yaw = current_yaw - last_current_yaw
+    last_current_yaw = current_yaw
+    if delta_current_yaw > 5.0:
+        count_current = -1
+    elif delta_current_yaw < -5.0:
+        count_current = 1
+    current_yaw = current_yaw + count_current * 2 * math.pi
+    return current_yaw,last_current_yaw
+
+
+
 
 
 def PIDcontroller(Kp, Ki, Kd, setpoint, process_value,last_integral,last_error):
@@ -81,10 +101,10 @@ def check_dist_goal(x1, y1, x2, y2):
     x2 y2: x and y coordinate of the goal
 
     Returns:
-        True if the goal is dropped.
+        True ifthe goal is dropped.
     """
     delta = 0.05
-    if abs(x2 - x1) < delta and abs(y2 - y1) < delta:
+    if abs(x2 - x1) < delta and abs(y2 - y1) < delta - 0.015:
         return True
 
 def check_angle_goal(x1,y1,x2,y2,yaw):
@@ -99,7 +119,7 @@ def check_angle_goal(x1,y1,x2,y2,yaw):
         True if the goal is dropped.
     """
 
-    delta = 0.2
+    delta = 0.7
     target_angle  = math.atan2(y2 - y1, x2 - x1)
     if abs(target_angle - yaw) < delta:
         return True
@@ -148,9 +168,9 @@ def map_action_to_button(action):
     elif np.array_equal(nparray, np.array([0., -1., 1.])):
         return 3  # left
     elif np.array_equal(nparray, np.array([1., 1., -1.])):
-        return 6  # forward+right
+        return 7  # forward+right
     elif np.array_equal(nparray, np.array([1., -1., 1.])):
-        return 7  # forward+left
+        return 6  # forward+left
     elif np.array_equal(nparray, np.array([-1., 1., -1.])):
         return 8  # back+right
     elif np.array_equal(nparray, np.array([-1., -1., 1.])):

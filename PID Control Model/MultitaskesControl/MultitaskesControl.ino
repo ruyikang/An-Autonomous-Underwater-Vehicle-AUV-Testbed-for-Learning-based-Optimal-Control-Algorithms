@@ -63,6 +63,7 @@ void setup() {
   for(int i = 22; i<=32; i+=2){
     pinMode(i, OUTPUT);
   }
+  
 //  Setup of pins for Submarine 2 (27MHz)
 }
 
@@ -389,7 +390,7 @@ void loop() {
   }
 
   if(cmd == 5){ // Dive
-    int timeDelay1 = 200;
+    int timeDelay1 = 800;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[5][(i-23)/2]);
@@ -436,8 +437,8 @@ void loop() {
 //************************************************************************************************************************
  
   if(cmd == 6){ // Forward + Right
-    int timeDelay1_forward = 500;
-    int timeDelay1_turn = 200;
+    int timeDelay1_forward = 300;
+    int timeDelay1_turn = 150;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1_turn)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[7][(i-23)/2]);
@@ -458,8 +459,8 @@ void loop() {
   }
 
   if(cmd == 7){ // Forward + Left
-    int timeDelay1_forward = 500;
-    int timeDelay1_turn = 200;
+    int timeDelay1_forward = 300;
+    int timeDelay1_turn = 150;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1_turn)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[8][(i-23)/2]);

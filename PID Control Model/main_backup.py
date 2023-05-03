@@ -42,6 +42,8 @@ def main():
     last_integral_dis = 0
     last_error_yaw = 0
     last_integral_yaw = 0
+    last_current_yaw = 0
+
     topwater = 48  # 顶部（潜艇付出水面） #actually 48    # 水深23cm 从48-72cm 但submarine高5cm，所以深度为67cm
     # cap = cv2.VideoCapture(1) # for macbook
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # open 1080hp camera (0), computer camera is (1)
@@ -480,7 +482,7 @@ def main():
                 last_x_real[0] = center_x_real
                 last_y_real[0] = center_y_real
                 last_distance[0] = distance
-                record_yaw_blue[counter % 5] = yaw_actual2
+                record_yaw_blue[counter % 5] = yaw_actual1
                 last_yaw[0] = yaw_actual2
             elif plate_type[res_index] == 'yellow':
                 last_x_real[1] = center_x_real
@@ -504,24 +506,26 @@ def main():
 
         if keyboard.is_pressed('s'):
             state = 1
+            myCmd = str(5) + '\r'
+            arduinoData.write(myCmd.encode())
 
         if counter % 5 == 0 and state == 1:
             # print(distance)
             yaw_actual_blue = np.median(record_yaw_blue)
             yaw_actual_black = np.median(record_yaw_black)
             #obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_blue]]
-            obs_blue = [[last_x_real[0], last_y_real[0], yaw_actual1]]
+            obs_blue = [[last_x_real[0], last_y_real[0], yaw_actual_blue]]
             obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_black]]
-            button, goal_indx, error_dis, error_yaw, integral_dis, integral_yaw = PID_Controller(-last_x_real[0]/100, -last_y_real[0]/100, yaw_actual_blue * math.pi/180, goal_indx, last_error_dis, last_integral_dis, last_error_yaw, last_integral_yaw)
-            last_error_yaw = error_yaw
-            last_integral_yaw = integral_yaw
-            last_error_dis = error_dis
-            last_integral_dis = integral_dis
-            print("test output")
-            print("button:{}".format(button))
-            
-            myCmd = str(button) + '\r'
-            arduinoData.write(myCmd.encode())
+            if goal_indx < 5:
+                button, goal_indx, error_dis, error_yaw, integral_dis, integral_yaw,last_current_yaw = PID_Controller(last_x_real[0]/100, last_y_real[0]/100, yaw_actual_blue * math.pi/180, goal_indx, last_error_dis, last_integral_dis, last_error_yaw, last_integral_yaw,last_current_yaw)
+                last_error_yaw = error_yaw
+                last_integral_yaw = integral_yaw
+                last_error_dis = error_dis
+                last_integral_dis = integral_dis
+                print("button:{}".format(button))
+                print("goal_indx:{}".format(goal_indx))
+                myCmd = str(button) + '\r'
+                arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()
