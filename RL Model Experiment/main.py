@@ -37,6 +37,9 @@ def main():
     dataline_blue = (0, 0)
     dataline_yellow = (0, 0)
     dataline_black = (0, 0)
+    action_blue = 10;
+    action_black = 10;
+
 
     topwater = 48  # 顶部（潜艇付出水面） #actually 48    # 水深23cm 从48-72cm 但submarine高5cm，所以深度为67cm
     # cap = cv2.VideoCapture(1) # for macbook
@@ -269,7 +272,7 @@ def main():
             # record distance according to different colors
             if plate_type[res_index] == 'black':
                 # distance = int((f * Wb) / (pref*pi))
-                distance = int(equ5(pref_short))
+                distance = int(equ6(pref_short))
             elif plate_type[res_index] == 'yellow':
                 distance = int(equ6(pref_long))
                 # if abs(int(equ5(pref_short)) - distance) > 4:
@@ -351,14 +354,58 @@ def main():
 
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
-            #cv2.putText(canvas, str(coordinate), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-            #            2)
-            # #cv2.putText(canvas, str(dataline_blue), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-            #                 2)
-            # cv2.putText(canvas, str(dataline_yellow), (40, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-            #                 2)
-            # cv2.putText(canvas, str(dataline_black), (60, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-            #                 2)
+
+            # Print action information on the top left of the screen
+
+            if action_blue == 2:
+                cv2.putText(canvas, "Blue Agent: Forward", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+            elif action_blue == 1:
+                cv2.putText(canvas, "Blue Agent: Backward", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_blue == 0:
+                cv2.putText(canvas, "Blue Agent: Turn Right", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_blue == 3:
+                cv2.putText(canvas, "Blue Agent: Turn Left", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_blue == 4:
+                cv2.putText(canvas, "Blue Agent: Up", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_blue == 5:
+                cv2.putText(canvas, "Blue Agent: Down", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_blue == 6:
+                cv2.putText(canvas, "Blue Agent: Start Diving", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            else:
+                cv2.putText(canvas, "Blue Agent: Stop", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+
+            if action_black == 2:
+                cv2.putText(canvas, "Black Agent: Forward", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+            elif action_black == 1:
+                cv2.putText(canvas, "Black Agent: Backward", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_black == 0:
+                cv2.putText(canvas, "Black Agent: Turn Right", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_black == 3:
+                cv2.putText(canvas, "Black Agent: Turn Left", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_black == 4:
+                cv2.putText(canvas, "Black Agent: Up", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_black == 5:
+                cv2.putText(canvas, "Black Agent: Down", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif action_black == 6:
+                cv2.putText(canvas, "Black Agent: Start Diving", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            else:
+                cv2.putText(canvas, "Black Agent: Stop", (40,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
             cvzone.putTextRect(canvas, f'{int(distance)}cm', (x, y + 20), thickness=1, scale=1)
 
             # cv2.arrowedLine(canvas, (70, 70), (1000, 70), color=(0, 255, 0), thickness=2, line_type=8, shift=0,
@@ -399,7 +446,7 @@ def main():
             if (cX > int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在右下，矩阵中心在左上,方向左上
                 # print("重心右下，中心左上")
                 # cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #            2)
                 yaw_actual1 = int(theta1) - 180
                 if yaw_actual > 0:
                     yaw_actual = yaw_actual - 180
@@ -410,7 +457,7 @@ def main():
             elif (cX > int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):  # 重心在右上，矩阵中心在左下
                 # print("重心右上，中心左下")
                 # cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #            2)
                 yaw_actual1 = int(theta1) + 90
                 if yaw_actual < 0:
                     yaw_actual = yaw_actual + 180
@@ -421,14 +468,14 @@ def main():
             elif (cX < int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
                 # `print`("重心左下，中心右上")
                 # cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                #            2)
                 yaw_actual1 = int(theta1) - 90
                 # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
                 #               , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):
                 # print("重心左上，中心右下")
                 # cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                            2)
+                            #2)
                 yaw_actual1 = int(theta1)
 
             else:
@@ -455,7 +502,7 @@ def main():
                 yaw_actual2 = -90
             else:
                 yaw_actual2 = -90 - yaw_actual
-            cv2.putText(canvas, str(yaw_actual), (cX + 20, cY + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(canvas, str(round(yaw_actual,2)), (cX + 20, cY + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             log = open('data.txt', mode='a', encoding='utf-8')
             if keyboard.is_pressed('t'):
                 switch = 1  # choose if you want to record data
@@ -496,6 +543,10 @@ def main():
         cv2.imshow("Camera1", canvas)  # show the screen for camera
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
+
+        if keyboard.is_pressed('d'):
+            myCmd = str(6) + ' ' + str(6) + '\r'
+            arduinoData.write(myCmd.encode())
 
         if keyboard.is_pressed('s'):
             state = 1

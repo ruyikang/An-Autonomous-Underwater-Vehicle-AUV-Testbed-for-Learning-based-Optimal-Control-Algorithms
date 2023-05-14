@@ -56,10 +56,10 @@ void setup() {
     pinMode(i, OUTPUT);
   }
   
-//  Setup of pins for Submarine 2 (27MHz)
   for(int i = 22; i<=32; i+=2){
     pinMode(i, OUTPUT);
   }
+//  Setup of pins for Submarine 2 (27MHz)
 }
 
 void loop() {
@@ -88,7 +88,7 @@ void loop() {
   }
   
   if(cmd == 2){ // Forward
-    int timeDelay1 = 400;
+    int timeDelay1 = 500;
     int timeDelay2 = 0;
     int timeDelay3 = 100;
     int timeDelay4 = 100;
@@ -125,7 +125,7 @@ void loop() {
   }
 
   if(cmd2 == 2){ // Forward
-    int timeDelay1 = 400;
+    int timeDelay1 = 300;
     int timeDelay2 = 100;
     int timeDelay3 = 100;
     int timeDelay4 = 100;
@@ -290,7 +290,7 @@ void loop() {
 //************************************************************************************************************************
   
   if(cmd == 0){ // Right
-    int timeDelay1 = 250;
+    int timeDelay1 = 220;
     int timeDelay2 = 120;
 //    int timeDelay3 = 100;
 //    int timeDelay4 = 120;
@@ -431,33 +431,39 @@ void loop() {
 //************************************************************************************************************************
 //************************************************************************************************************************
  
-  if(cmd == 6){ // Start Diving 40MHz
-    int timeDelay1 = 500;
-    if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1)){
+  if(cmd == 6){ // Keep floating
+    int floatInterval1 = 1000;
+    int floatInterval2 = 1000;
+    if((currentTime - storedFloatTime >= 0) && (currentTime - storedFloatTime < floatInterval1)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[5][(i-23)/2]);
       }
     }
-
-    if(currentTime - storedTime >= timeDelay1){
+    else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
       for(int i=23; i<=33; i+=2){
-        digitalWrite(i,controls[0][(i-23)/2]);
+        digitalWrite(i,controls[6][(i-23)/2]);
       }
+    }
+    else{
+      storedFloatTime = currentTime;
     }
   }
 
-  if(cmd2 == 6){ // Start Diving 27MHz
-   int timeDelay1 = 500;
-    if((currentTime - storedTime2 >= 0) && (currentTime - storedTime2 < timeDelay1)){
+  if(cmd2 == 6){ // Keep floating
+    int floatInterval1 = 1000;
+    int floatInterval2 = 1000;
+    if((currentTime - storedFloatTime >= 0) && (currentTime - storedFloatTime < floatInterval1)){
       for(int i=22; i<=32; i+=2){
         digitalWrite(i,controls2[5][(i-22)/2]);
       }
     }
-
-    if(currentTime - storedTime2 >= timeDelay1){
+    else if((currentTime - storedFloatTime >= floatInterval1) && (currentTime - storedFloatTime < floatInterval1+floatInterval2)){
       for(int i=22; i<=32; i+=2){
-        digitalWrite(i,controls2[0][(i-22)/2]);
+        digitalWrite(i,controls2[6][(i-22)/2]);
       }
+    }
+    else{
+      storedFloatTime = currentTime;
     }
   }
 }
