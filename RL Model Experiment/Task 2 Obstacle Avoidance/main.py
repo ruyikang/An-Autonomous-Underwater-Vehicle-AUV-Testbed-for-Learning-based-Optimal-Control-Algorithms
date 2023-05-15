@@ -545,36 +545,26 @@ def main():
             break
 
         if keyboard.is_pressed('d'):
-            myCmd = str(6) + ' ' + str(6) + '\r'
+            myCmd = str(6) + '\r'
             arduinoData.write(myCmd.encode())
 
         if keyboard.is_pressed('s'):
             state = 1
 
         if counter % 5 == 0 and state == 1:
-            # print(distance)
             yaw_actual_blue = np.median(record_yaw_blue)
-            yaw_actual_black = np.median(record_yaw_black)
             obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_blue]]
-            obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_black]]
-            # obs_blue = [[-last_y_real[0], -last_x_real[0], last_yaw[0]]]
-            # obs_black = [[-last_y_real[2], -last_x_real[2], last_yaw[2]]]
 
             action = model.predict(obs_blue)
-            action_blue = action[0][0]
-            action = model.predict(obs_black)
-            action_black = action[0][1]
-            print("{}".format(obs_black))
-            print("Black:{}".format(action_black))
+            action_blue = action
             print("{}".format(obs_blue))
             print("Blue:{}".format(action_blue))
 
-            myCmd = str(action_blue) + ' ' + str(action_black) + '\r'
+            myCmd = str(action_blue) + '\r'
             arduinoData.write(myCmd.encode())
 
     cap.release()
     cv2.destroyAllWindows()
-    # print(record_x, record_y, '', x2, y2,'',x,y)
 
 
 if __name__ == '__main__':

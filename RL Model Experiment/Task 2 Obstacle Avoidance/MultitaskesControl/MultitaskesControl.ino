@@ -67,8 +67,8 @@ void loop() {
   
   // Receive signal data from Pyton terminal
   if(Serial.available() > 0){
-    cmd = Serial.readStringUntil(' ').toInt();
-    cmd2 =  Serial.readStringUntil('\r').toInt();
+    cmd = Serial.readStringUntil('\r').toInt();
+    cmd2 =  10;
     storedTime = millis();
     storedTime2 = millis();
     }
