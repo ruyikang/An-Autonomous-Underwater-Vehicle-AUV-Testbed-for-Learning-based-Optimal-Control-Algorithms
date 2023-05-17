@@ -35,6 +35,7 @@ def main():
     dataline_blue = (0, 0)
     dataline_yellow = (0, 0)
     dataline_black = (0, 0)
+    button = 10;
 
     # PID Parameters
     goal_indx = 0
@@ -123,8 +124,8 @@ def main():
         flag, img = cap.read()  # read every frame
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray1 = gray
-        gray1[gray1 > 200] = 255
-        gray1[gray1 < 100] = 0  # 把中间像素转化为黑与白
+        gray1[gray1 > 100] = 255
+        gray1[gray1 < 70] = 0  # 把中间像素转化为黑与白
         blur = cv2.medianBlur(gray1, 3)  # median blur
         ret, dst = cv2.threshold(blur, 105, 255,
                                  cv2.THRESH_BINARY_INV)  # 与环境有关, can be adjusted 前值越小 越能放噪音 但太小会导致本身轮廓消失
@@ -357,8 +358,60 @@ def main():
 
             cv2.putText(canvas, str(center_xy_real), (cX - 20, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                         2)
-            cv2.putText(canvas, str(timestamp[0:8]), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+            # cv2.putText(canvas, str(timestamp[0:8]), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+            #             2)
+
+            if button == 2:
+                cv2.putText(canvas, "Blue Agent: Forward", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                         2)
+            elif button == 1:
+                cv2.putText(canvas, "Blue Agent: Backward", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 0:
+                cv2.putText(canvas, "Blue Agent: Turn Right", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 3:
+                cv2.putText(canvas, "Blue Agent: Turn Left", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 4:
+                cv2.putText(canvas, "Blue Agent: Up", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 5:
+                cv2.putText(canvas, "Blue Agent: Down", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 6:
+                cv2.putText(canvas, "Blue Agent: Forward + Turn Right", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 7:
+                cv2.putText(canvas, "Blue Agent: Forward + Turn Left", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 8:
+                cv2.putText(canvas, "Blue Agent: Backward + Turn Right", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            elif button == 9:
+                cv2.putText(canvas, "Blue Agent: Backward + Turn Left", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+            else:
+                cv2.putText(canvas, "Blue Agent: Stop", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            2)
+
+            if goal_indx == 0:
+                cv2.putText(canvas, "Current Goal: (15, 32)/cm", (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+            if goal_indx == 1:
+                cv2.putText(canvas, "Current Goal: (30, 32)/cm", (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+            if goal_indx == 2:
+                cv2.putText(canvas, "Current Goal: (40, 32)/cm", (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+            if goal_indx == 3:
+                cv2.putText(canvas, "Current Goal: (45, 10)/cm", (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+            if goal_indx == 4:
+                cv2.putText(canvas, "Successful!", (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                        2)
+
+
             # #cv2.putText(canvas, str(dataline_blue), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
             #                 2)
             # cv2.putText(canvas, str(dataline_yellow), (40, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
@@ -462,7 +515,7 @@ def main():
             else:
                 yaw_actual2 = -90 - yaw_actual
             yaw_actual_print = round(yaw_actual,2)
-            cv2.putText(canvas, str(yaw_actual_print), (cX + 20, cY + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            cv2.putText(canvas, str(yaw_actual_print), (cX + 20, cY + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
             log = open('data.txt', mode='a', encoding='utf-8')
             if keyboard.is_pressed('t'):
                 switch = 1  # choose if you want to record data
@@ -504,10 +557,13 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
-        if keyboard.is_pressed('s'):
-            state = 1
+        if keyboard.is_pressed('d'):
             myCmd = str(5) + '\r'
             arduinoData.write(myCmd.encode())
+
+        if keyboard.is_pressed('s'):
+            state = 1
+
 
         if counter % 5 == 0 and state == 1:
             # print(distance)
@@ -526,6 +582,11 @@ def main():
                 print("goal_indx:{}".format(goal_indx))
                 myCmd = str(button) + '\r'
                 arduinoData.write(myCmd.encode())
+            if goal_indx == 4:
+                myCmd = str(10) + '\r'
+                arduinoData.write(myCmd.encode())
+
+
 
     cap.release()
     cv2.destroyAllWindows()

@@ -437,8 +437,8 @@ void loop() {
 //************************************************************************************************************************
  
   if(cmd == 6){ // Forward + Right
-    int timeDelay1_forward = 300;
-    int timeDelay1_turn = 150;
+    int timeDelay1_forward = 220;
+    int timeDelay1_turn = 120;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1_turn)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[7][(i-23)/2]);
@@ -459,8 +459,8 @@ void loop() {
   }
 
   if(cmd == 7){ // Forward + Left
-    int timeDelay1_forward = 300;
-    int timeDelay1_turn = 150;
+    int timeDelay1_forward = 220;
+    int timeDelay1_turn = 120;
     if((currentTime - storedTime >= 0) && (currentTime - storedTime < timeDelay1_turn)){
       for(int i=23; i<=33; i+=2){
         digitalWrite(i,controls[8][(i-23)/2]);
