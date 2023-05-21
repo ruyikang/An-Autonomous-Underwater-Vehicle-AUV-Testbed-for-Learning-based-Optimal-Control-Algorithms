@@ -153,6 +153,7 @@ def main():
         # d和w之间是反比关系， 因为焦距和物体真实大小都是固定的
 
         obj_rect_cnt_list = []
+        centroids = []
         for i, cnt in enumerate(contours):
 
             ct = time.time()
@@ -171,17 +172,6 @@ def main():
 
             if cv2.boundingRect(cnt) != (0, 0, 0, 0):
                 crop = img[y1:y1 + h, x1:x1 + w]
-            # matchrate = cv2.matchTemplate(gray,template,cv2.TM_CCORR_NORMED)  # 模板匹配
-            # #print(matchrate)
-            # min_val,max_val,min_loc,max_loc = cv2.minMaxLoc(matchrate)
-            # print(min_val,max_val,min_loc,max_loc)
-            # loc = np.where(matchrate >= 0.953)
-            # for pt in zip(*loc[::-1]):
-            #     bottom_right = (pt[0] + w1, pt[1] + h1)
-            #     cv2.rectangle(canvas, pt, bottom_right, (255, 0, 0), 1)
-
-            # if np.where(matchrate <= 0.95): # 匹配度大于70% 则留下
-            #      continue
             min_area_rect = cv2.minAreaRect(cnt)
             # cv2.contourArea(cnt) # 求面积
             # cv2.arcLength(cnt,True) # 求周长
@@ -194,12 +184,17 @@ def main():
             theta = math.atan2(2 * b, (a - c)) / 2  # [-90,90]
             center_x = str(min_area_rect[0][0]).split('.')[0]
             center_y = str(min_area_rect[0][1]).split('.')[0]
+            centroids.append((center_x, center_y))
             # center_x_real = (int(center_x)-360) / 9.571 only for bottom situation
             # center_y_real = (int(center_y)-180) / 10.29
             # print(center_x_real,center_y_real)
             width = str(min_area_rect[1][0]).split('.')[0]
             height = str(min_area_rect[1][1]).split('.')[0]
             theta1 = str(min_area_rect[2]).split('.')[0]
+            if len(centroids) > 1:
+              for i in range(1, len(centroids)):
+                thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
+                cv2.line(canvas, centroids[i - 1], centroids[i], (0, 0, 255), thickness)
 
 # 0            #error adjustion
 #             if int(center_x) > 800:
