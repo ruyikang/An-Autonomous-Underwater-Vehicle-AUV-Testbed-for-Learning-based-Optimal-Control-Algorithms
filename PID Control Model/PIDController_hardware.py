@@ -7,8 +7,8 @@ def PID_Controller(x,y,yaw,i,last_error_dis,last_integral_dis,last_error_yaw,las
 
 
     goal1 = np.array([0.15, 0.32])
-    goal2 = np.array([0.3, 0.32])
-    goal3 = np.array([0.4, 0.32])
+    goal2 = np.array([0.30, 0.32])
+    goal3 = np.array([0.40, 0.32])
     goal4 = np.array([0.45, 0.10])
     goal5 = np.array([100,100])   # no sense, for stopping at goal4
     goal = [goal1, goal2, goal3, goal4, goal5]

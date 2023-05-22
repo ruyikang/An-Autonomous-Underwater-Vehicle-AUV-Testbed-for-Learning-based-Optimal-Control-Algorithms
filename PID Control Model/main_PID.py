@@ -157,8 +157,11 @@ def main():
         # d和w之间是反比关系， 因为焦距和物体真实大小都是固定的
 
         obj_rect_cnt_list = []
+        ct = time.time()
+        local_time = time.localtime(ct)
+        date = str(time.strftime("%Y%m%d %H%M%S", local_time))
+        micro = datetime.datetime.now().microsecond / 1000  # microsecond
         for i, cnt in enumerate(contours):
-
             ct = time.time()
             local_time = time.localtime(ct)
             date = str(time.strftime("%Y%m%d %H%M%S", local_time))
@@ -454,55 +457,69 @@ def main():
             # for function_x in range(0,200):
             #     if (center_x-x)^2 + (center_y-y)^2 == 500:
             #         function_x = function_x
-
             if (cX > int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在右下，矩阵中心在左上,方向左上
-                # print("重心右下，中心左上")
-                #cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                print("重心右下，中心左上")
+                # cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) - 180
-                if yaw_actual > 0:
-                    yaw_actual = yaw_actual - 180
-                elif yaw_actual > -180 and yaw_actual < -90:
+                if -180 < yaw_actual < -90:
                     yaw_actual = yaw_actual
+                else:
+                    if 0 < yaw_actual < 90:
+                        yaw_actual = yaw_actual - 180
+                    elif 90 < yaw_actual < 180:
+                        yaw_actual = yaw_actual - 270
+                    elif -180 < yaw_actual < -90:
+                        yaw_actual = yaw_actual
+                    elif yaw_actual == 90:
+                        yaw_actual = yaw_actual - 180
+
                 # cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 # , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX > int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):  # 重心在右上，矩阵中心在左下
-                # print("重心右上，中心左下")
-                #cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                print("重心右上，中心左下")
+                # cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) + 90
                 if yaw_actual < 0:
                     yaw_actual = yaw_actual + 180
-                elif yaw_actual < 180 and yaw_actual > 90:
+                elif 180 > yaw_actual > 90:
                     yaw_actual = yaw_actual
+                if yaw_actual == -90:
+                    yaw_actual = yaw_actual + 180
                 # cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
-                # `print`("重心左下，中心右上")
-                #cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                print("重心左下，中心右上")
+                # cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) - 90
+                if yaw_actual >= 90:
+                    yaw_actual - 180
+                elif yaw_actual < -90:
+                    yaw_actual = yaw_actual + 90
                 # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
                 #               , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):
-                # print("重心左上，中心右下")
-                #cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
-                #           2)
+                print("重心左上，中心右下")
+                # cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
+                            #2)
+                if -90 <yaw_actual < 0:
+                    yaw_actual = yaw_actual + 90
+                elif -180 < yaw_actual < -90:
+                    yaw_actual = yaw_actual + 180
+                elif yaw_actual > 90:
+                    yaw_actual = yaw_actual - 90
                 yaw_actual1 = int(theta1)
+                if yaw_actual == -90:
+                    yaw_actual = yaw_actual + 180
 
-            else:
-                # print("重心左上，中心右下")
-                yaw_actual1 = int(theta1)
-                # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
-                #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
-                if center_y > 600 or center_y < 120:
-                    yaw_actual = yaw_actual - 180
-            if (180 < yaw_actual <= 270):  # double check
+            if 180 < yaw_actual <= 270:  # double check
                 yaw_actual = yaw_actual - 360
-            elif (-270 <= yaw_actual < -180):
+            elif -270 <= yaw_actual < -180:
                 yaw_actual = yaw_actual + 360
             yaw_actual2 = 0
-            if yaw_actual > 90 and yaw_actual < 180:
+            if 90 < yaw_actual < 180:
                 yaw_actual2 = 270 - yaw_actual
             elif yaw_actual == 90:
                 yaw_actual2 = 180
@@ -573,7 +590,10 @@ def main():
             obs_blue = [[last_x_real[0], last_y_real[0], yaw_actual_blue]]
             obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_black]]
             if goal_indx < 5:
-                button, goal_indx, error_dis, error_yaw, integral_dis, integral_yaw,last_current_yaw = PID_Controller(last_x_real[0]/100, last_y_real[0]/100, yaw_actual_blue * math.pi/180, goal_indx, last_error_dis, last_integral_dis, last_error_yaw, last_integral_yaw,last_current_yaw)
+                #button, goal_indx, error_dis, error_yaw, integral_dis, integral_yaw,last_current_yaw = PID_Controller(last_x_real[0]/100, last_y_real[0]/100, yaw_actual_blue * math.pi/180, goal_indx, last_error_dis, last_integral_dis, last_error_yaw, last_integral_yaw,last_current_yaw)
+                button, goal_indx, error_dis, error_yaw, integral_dis, integral_yaw, last_current_yaw = PID_Controller(
+                    int(center_x_real) / 100, int(center_y_real) / 100, yaw_actual * math.pi / 180, goal_indx,
+                    last_error_dis, last_integral_dis, last_error_yaw, last_integral_yaw, last_current_yaw)
                 last_error_yaw = error_yaw
                 last_integral_yaw = integral_yaw
                 last_error_dis = error_dis
@@ -582,6 +602,10 @@ def main():
                 print("goal_indx:{}".format(goal_indx))
                 myCmd = str(button) + '\r'
                 arduinoData.write(myCmd.encode())
+                # save data
+                log100 = open('pid_real_data.txt', mode='a', encoding='utf-8')
+                print(int(counter/5),date,micro,goal_indx,error_dis,error_yaw,file=log100)
+
             if goal_indx == 4:
                 myCmd = str(10) + '\r'
                 arduinoData.write(myCmd.encode())

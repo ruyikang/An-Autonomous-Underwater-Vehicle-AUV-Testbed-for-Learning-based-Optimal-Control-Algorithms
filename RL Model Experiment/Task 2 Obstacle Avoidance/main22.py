@@ -116,7 +116,7 @@ def main():
     equ8 = np.poly1d(coff_centerx)
     coff_centery = np.polyfit(centery, centery_error, 1)
     equ9 = np.poly1d(coff_centery)
-    scale_percent = 50  # 缩放比例，这里将图像缩小到原来的50%
+    scale_percent1 = 200  # 缩放比例，这里将图像缩小到原来的50%
 
     while isOpened:
         counter = counter + 1
@@ -132,12 +132,11 @@ def main():
         obj_bin = cv2.erode(dst, kernel, iterations=1)
         kernel = np.ones((3, 3), np.uint8)
         obj_bin = cv2.dilate(obj_bin, kernel, iterations=1)
-        width_img = int(obj_bin.shape[1] * scale_percent / 100)
-        height_img = int(obj_bin.shape[0] * scale_percent / 100)
-        new_size = (width, height)
+        width_img = int(obj_bin.shape[1] * scale_percent1 / 100)
+        height_img = int(obj_bin.shape[0] * scale_percent1 / 100)
+        new_size = (width_img, height_img)
         resized_image = cv2.resize(obj_bin, new_size)
         contours, hier = cv2.findContours(obj_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        contours2, hier2 = cv2.findContours(resized_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         AREA_THRESHOLD_L = 4000  # 4000
         AREA_THRESHOLD_H = 30000  # 20000    define the contour area
         canvas = np.copy(img)
@@ -161,11 +160,6 @@ def main():
         # d和w之间是反比关系， 因为焦距和物体真实大小都是固定的
 
         obj_rect_cnt_list = []
-        scale_percent = 1
-        for i2, cnt2 in enumerate(contours2):
-            M = cv2.moments(cnt2)
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
         for i, cnt in enumerate(contours):
 
             ct = time.time()
@@ -198,11 +192,10 @@ def main():
             min_area_rect = cv2.minAreaRect(cnt)
             # cv2.contourArea(cnt) # 求面积
             # cv2.arcLength(cnt,True) # 求周长
-            scaled_contour = cnt * scale_percent
-            scaled_contour = scaled_contour.astype(int)
-            M2 = cv2.moments(scaled_contour)
-            cX2 = int(M["m10"] / M["m00"])
-            cY2 = int(M["m01"] / M["m00"])
+            M = cv2.moments(cnt)
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            contours2, hier2 = cv2.findContours(resized_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             a = float(M["m20"] / M["m00"] - cX * cX)
             b = float(M["m11"] / M["m00"] - cX * cY)
             c = float(M["m02"] / M["m00"] - cY * cY)

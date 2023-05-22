@@ -16,7 +16,9 @@ arduinoData = serial.Serial('com3', 115200)
 
 
 def main():
+    trajectory = []
     state = 0
+    state1 = 0
     last_x_real = [0,0,0]
     last_y_real = [0,0,0]
     center_y_real = 0
@@ -153,7 +155,6 @@ def main():
         # d和w之间是反比关系， 因为焦距和物体真实大小都是固定的
 
         obj_rect_cnt_list = []
-        centroids = []
         for i, cnt in enumerate(contours):
 
             ct = time.time()
@@ -184,17 +185,14 @@ def main():
             theta = math.atan2(2 * b, (a - c)) / 2  # [-90,90]
             center_x = str(min_area_rect[0][0]).split('.')[0]
             center_y = str(min_area_rect[0][1]).split('.')[0]
-            centroids.append((center_x, center_y))
             # center_x_real = (int(center_x)-360) / 9.571 only for bottom situation
             # center_y_real = (int(center_y)-180) / 10.29
             # print(center_x_real,center_y_real)
             width = str(min_area_rect[1][0]).split('.')[0]
             height = str(min_area_rect[1][1]).split('.')[0]
             theta1 = str(min_area_rect[2]).split('.')[0]
-            if len(centroids) > 1:
-              for i in range(1, len(centroids)):
-                thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
-                cv2.line(canvas, centroids[i - 1], centroids[i], (0, 0, 255), thickness)
+
+
 
 # 0            #error adjustion
 #             if int(center_x) > 800:
@@ -252,7 +250,8 @@ def main():
             rect_contour = np.int64(cv2.boxPoints(min_area_rect))
             # print(left_point_x,right_point_x,top_point_y,bottom_point_y)
             obj_rect_cnt_list.append(rect_contour)  # record points of min area rect
-
+            trajectory.append((int(center_x),int(center_y)))
+            print(len(trajectory))
             # preference length definition
             if int(width) > int(height):
                 pref_long = int(width)
@@ -376,6 +375,13 @@ def main():
             else:
                 cv2.putText(canvas, "Blue Agent: Stop", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                             2)
+            print(trajectory[0])
+            if state1 == 1:
+                print('trajectory.append((center_x, center_y))')
+                for i in range(1, len(trajectory)):
+                    if trajectory[i - 1] is None or trajectory[i] is None:
+                        continue
+                    cv2.line(canvas, trajectory[i - 1], trajectory[i], (0, 0, 255), 2)
 
 
 
@@ -537,7 +543,8 @@ def main():
 
         if keyboard.is_pressed('s'):
             state = 1
-
+        if keyboard.is_pressed('r'):
+            state1 = 1
         if counter % 5 == 0 and state == 1:
             yaw_actual_blue = np.median(record_yaw_blue)
             obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_blue]]
@@ -549,6 +556,7 @@ def main():
 
             myCmd = str(action_blue) + '\r'
             arduinoData.write(myCmd.encode())
+        trajectory_previous = tuple(trajectory)
 
     cap.release()
     cv2.destroyAllWindows()
