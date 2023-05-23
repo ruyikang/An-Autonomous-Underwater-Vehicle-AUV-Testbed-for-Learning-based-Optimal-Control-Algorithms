@@ -8,7 +8,7 @@ import cvzone
 
 import joblib
 
-model = joblib.load(r"DTC_task2_v6.pkl")
+model = joblib.load(r"task3_v6.pkl")
 
 import serial
 
@@ -188,6 +188,15 @@ def main():
             M = cv2.moments(cnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
+            weight = img.astype(np.float32)
+
+            # 对权重矩阵进行加权处理
+            weight = weight / np.max(weight)  # 将权重归一化到0-1范围
+            weight = 1 - weight  # 反转权重，使质量更高的区域权重更大
+            weight = weight ** 3
+            # 对重心进行加权计算
+            cX = int(np.sum(weight * cX) / np.sum(weight))
+            cY = int(np.sum(weight * cY) / np.sum(weight))
             a = float(M["m20"] / M["m00"] - cX * cX)
             b = float(M["m11"] / M["m00"] - cX * cY)
             c = float(M["m02"] / M["m00"] - cY * cY)
@@ -203,14 +212,12 @@ def main():
 
             #error adjustion
             if int(center_x) > 800:
-                cX = cX + 2
+                cX = cX + 4
+                if yaw_actual > 170 or yaw_actual < -170:
+                    cY = cY + 2
             elif int(center_x) < 360:
-                cX = cX - 2
+                cX = cX - 4
 
-            if int(center_y) > 600:
-                cY = cY + 1
-            elif int(center_y) < 120:
-                cY = cY - 1
 
             # if int(center_x) > 760:
             #     cX = cX + int(equ8(center_x))
@@ -444,53 +451,70 @@ def main():
             #         function_x = function_x
 
             if (cX > int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在右下，矩阵中心在左上,方向左上
-                # print("重心右下，中心左上")
+                print(str(plate_type[res_index])+"左上")
                 # cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) - 180
-                if yaw_actual > 0:
+                if 0 < yaw_actual < 90:
                     yaw_actual = yaw_actual - 180
-                elif yaw_actual > -180 and yaw_actual < -90:
-                    yaw_actual = yaw_actual
+                elif 90 < yaw_actual < 180:
+                    yaw_actual = yaw_actual - 270
+                elif -90 < yaw_actual < 0:
+                    yaw_actual = yaw_actual - 90
+                elif yaw_actual == 90:
+                    yaw_actual = yaw_actual - 180
+
                 # cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 # , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX > int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):  # 重心在右上，矩阵中心在左下
-                # print("重心右上，中心左下")
+                print(str(plate_type[res_index])+"左下")
                 # cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) + 90
-                if yaw_actual < 0:
+                if -90 < yaw_actual < 0:
                     yaw_actual = yaw_actual + 180
-                elif yaw_actual < 180 and yaw_actual > 90:
-                    yaw_actual = yaw_actual
+                elif -180 < yaw_actual < -90:
+                    yaw_actual = yaw_actual + 270
+                elif 90 > yaw_actual > 0:
+                    yaw_actual = yaw_actual + 90
+                if yaw_actual == -90:
+                    yaw_actual = yaw_actual + 180
                 # cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
-                # `print`("重心左下，中心右上")
+                print(str(plate_type[res_index])+"右上")
                 # cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) - 90
+                if 90 < yaw_actual < 180:
+                    yaw_actual = yaw_actual - 180
+                elif -180 < yaw_actual < -90:
+                    yaw_actual = yaw_actual + 90
+                elif 0 < yaw_actual < 90:
+                    yaw_actual = yaw_actual - 90
                 # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
                 #               , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
             elif (cX < int(min_area_rect[0][0])) and (cY < int(min_area_rect[0][1])):
-                # print("重心左上，中心右下")
+                print(str(plate_type[res_index])+"右下")
                 # cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             #2)
+                if -90 <yaw_actual < 0:
+                    yaw_actual = yaw_actual + 90
+                elif -180 < yaw_actual < -90:
+                    yaw_actual = yaw_actual + 180
+                elif yaw_actual > 90:
+                    yaw_actual = yaw_actual - 90
                 yaw_actual1 = int(theta1)
+                if yaw_actual == -90:
+                    yaw_actual = yaw_actual + 180
 
-            else:
-                # print("重心左上，中心右下")
-                yaw_actual1 = int(theta1)
-                # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
-                #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
-                if center_y > 600 or center_y < 120:
-                    yaw_actual = yaw_actual - 180
-            if (180 < yaw_actual <= 270):  # double check
+            if 180 < yaw_actual <= 270:  # double check
                 yaw_actual = yaw_actual - 360
-            elif (-270 <= yaw_actual < -180):
+            elif -270 <= yaw_actual < -180:
                 yaw_actual = yaw_actual + 360
             yaw_actual2 = 0
-            if yaw_actual > 90 and yaw_actual < 180:
+
+            if 90 < yaw_actual < 180:
                 yaw_actual2 = 270 - yaw_actual
             elif yaw_actual == 90:
                 yaw_actual2 = 180
@@ -522,6 +546,8 @@ def main():
                 last_x_real[0] = center_x_real
                 last_y_real[0] = center_y_real
                 last_distance[0] = distance
+                cX = cX + 4
+                cY = cY + 2
                 record_yaw_blue[counter % 5] = yaw_actual2
                 last_yaw[0] = yaw_actual2
             elif plate_type[res_index] == 'yellow':
@@ -533,6 +559,8 @@ def main():
                 last_x_real[2] = center_x_real
                 last_y_real[2] = center_y_real
                 last_distance[2] = distance
+                cX = cX - 4
+                cY = cY - 2
                 record_yaw_black[counter % 5] = yaw_actual2
                 last_yaw[2] = yaw_actual2
 
@@ -544,9 +572,11 @@ def main():
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
-        if keyboard.is_pressed('d'):
-            myCmd = str(6) + ' ' + str(6) + '\r'
+        if state == 0:
+            myCmd = str(5) + ' ' + str(5) + '\r'
             arduinoData.write(myCmd.encode())
+
+
 
         if keyboard.is_pressed('s'):
             state = 1

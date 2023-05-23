@@ -125,7 +125,7 @@ void loop() {
   }
 
   if(cmd2 == 2){ // Forward
-    int timeDelay1 = 300;
+    int timeDelay1 = 400;
     int timeDelay2 = 100;
     int timeDelay3 = 100;
     int timeDelay4 = 100;
@@ -211,7 +211,7 @@ void loop() {
 //************************************************************************************************************************
 
   if(cmd == 3){ // Left
-    int timeDelay1 = 200;
+    int timeDelay1 = 250;
     int timeDelay2 = 120;
 //    int timeDelay3 = 100;
 //    int timeDelay4 = 120;
@@ -290,7 +290,7 @@ void loop() {
 //************************************************************************************************************************
   
   if(cmd == 0){ // Right
-    int timeDelay1 = 220;
+    int timeDelay1 = 250;
     int timeDelay2 = 120;
 //    int timeDelay3 = 100;
 //    int timeDelay4 = 120;
