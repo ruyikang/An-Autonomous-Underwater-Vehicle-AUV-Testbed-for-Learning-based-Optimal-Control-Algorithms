@@ -211,12 +211,12 @@ def main():
             theta1 = str(min_area_rect[2]).split('.')[0]
 
             #error adjustion
-            if int(center_x) > 800:
-                cX = cX + 4
-                if yaw_actual > 170 or yaw_actual < -170:
+            if (cX > int(min_area_rect[0][0])):
+                if abs(cY-center_y) <= 2:
                     cY = cY + 2
-            elif int(center_x) < 360:
-                cX = cX - 4
+            elif (cX < int(min_area_rect[0][0])):
+                if abs(cY-center_y) <= 2:
+                    cY = cY - 2
 
 
             # if int(center_x) > 760:
