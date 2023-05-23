@@ -5,10 +5,12 @@ import math
 import keyboard
 import time
 import cvzone
-
 import joblib
 
-model = joblib.load(r"task3_v6.pkl")
+# model = joblib.load(r"task3_v6.pkl")
+model_blue = joblib.load(r"task3_1v7.pkl")
+model_black = joblib.load(r"task3_2v7.pkl")
+
 
 import serial
 
@@ -16,10 +18,17 @@ arduinoData = serial.Serial('com3', 115200)
 
 
 def main():
+    bump = 0
+    y11 = 0
+    y2 = 0
+    x2 = 0
+    x11 = 0
+    yaw_actual3 = 0
+    yaw_actual4 = 0
     state = 0
     state_para = 0
-    last_x_real = [0,0,0]
-    last_y_real = [0,0,0]
+    last_x_real = [0,0,0,0,0]
+    last_y_real = [0,0,0,0,0]
     center_y_real = 0
     center_x_real = 0
     yaw_actual2 = 0
@@ -30,7 +39,7 @@ def main():
     record_yaw_black = np.array([0,0,0,0,0])
     pref_long = 0  # long pixel for contour
     pref_short = 0  # short pixel for contour
-    plate_type = ["blue", "yellow", "black"]
+    plate_type = ["blue", "black"]
     res_index = 0
     counter = 0
     switch = 0
@@ -62,14 +71,11 @@ def main():
     upper_blue_hsv = np.array([124, 255, 255])
     # lower_red_hsv = np.array([156, 43, 46])
     # upper_red_hsv = np.array([180, 255, 255])
-    lower_yellow_hsv = np.array([11, 43, 46])
-    upper_yellow_hsv = np.array([34, 255, 255])
     lower_black_hsv = np.array([0, 0, 46])
-    upper_black_hsv = np.array([180, 43, 150])
+    upper_black_hsv = np.array([180, 43, 110])
     color_dict['blue'] = [lower_blue_hsv, upper_blue_hsv]
-    color_dict['yellow'] = [lower_yellow_hsv, upper_yellow_hsv]
     color_dict['black'] = [lower_black_hsv, upper_black_hsv]
-
+    print(color_dict)
     # template = cv2.imread("template.png",0)
     # width and centimeters
     f = 0.0028  # 焦距2.8mm
@@ -117,6 +123,7 @@ def main():
     equ9 = np.poly1d(coff_centery)
 
     while isOpened:
+        box = []
         counter = counter + 1
         flag, img = cap.read()  # read every frame
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -187,7 +194,8 @@ def main():
                     cX1,cY1 = farthest_point
             print("The farthest point: ", farthest_point)
             print("The maximum depth: ", max_depth / 256.0)  # 得到实际的距离
-            cv2.circle(canvas, farthest_point, 2, (0, 255, 0), -1)
+
+            cv2.circle(canvas, farthest_point, 4, (0, 255, 0), -1)
             # matchrate = cv2.matchTemplate(gray,template,cv2.TM_CCORR_NORMED)  # 模板匹配
             # #print(matchrate)
             # min_val,max_val,min_loc,max_loc = cv2.minMaxLoc(matchrate)
@@ -222,6 +230,7 @@ def main():
             theta = math.atan2(2 * b, (a - c)) / 2  # [-90,90]
             center_x = str(min_area_rect[0][0]).split('.')[0]
             center_y = str(min_area_rect[0][1]).split('.')[0]
+
             # center_x_real = (int(center_x)-360) / 9.571 only for bottom situation
             # center_y_real = (int(center_y)-180) / 10.29
             # print(center_x_real,center_y_real)
@@ -271,14 +280,14 @@ def main():
                 frame = frame.astype(np.uint8)
             img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # change to HSV
             mask_blue = cv2.inRange(img_hsv, color_dict['blue'][0], color_dict['blue'][1])
-            mask_yellow = cv2.inRange(img_hsv, color_dict['yellow'][0], color_dict['yellow'][1])
+
             mask_black = cv2.inRange(img_hsv, color_dict['black'][0], color_dict['black'][1])
             blue_sum = (mask_blue == 255).sum()
-            yellow_sum = (mask_yellow == 255).sum()
+
             black_sum = (mask_black == 255).sum()
-            sum_list = np.array([blue_sum, yellow_sum, black_sum])
+            sum_list = np.array([blue_sum, black_sum])
             res_index = np.argmax(sum_list)  # choose the maximum value
-            plate_type = ["blue", "yellow", "black"]
+            plate_type = ["blue", "black"]
 
             center = str(min_area_rect[0][0]).split('.')[0] + ',' + str(min_area_rect[0][1]).split('.')[0]
             x = int(center.split(',')[0])
@@ -303,10 +312,6 @@ def main():
             if plate_type[res_index] == 'black':
                 # distance = int((f * Wb) / (pref*pi))
                 distance = int(equ6(pref_short))
-            elif plate_type[res_index] == 'yellow':
-                distance = int(equ6(pref_long))
-                # if abs(int(equ5(pref_short)) - distance) > 4:
-                #     distance = int(equ5(pref_short))
             elif plate_type[res_index] == 'blue':
                 # distance = int((f * W) / (pref*pi))
                 distance = int(equ6(pref_long))
@@ -325,14 +330,6 @@ def main():
                     if last_distance[0] > distance:
                         distance = distance + 1
                     elif last_distance[0] < distance:
-                        distance = distance - 1
-                    else:
-                        distance = distance
-            elif plate_type[res_index] == 'yellow':
-                if abs(last_distance[1] - distance) >= 1:
-                    if last_distance[1] > distance:
-                        distance = distance + 1
-                    elif last_distance[1] < distance:
                         distance = distance - 1
                     else:
                         distance = distance
@@ -357,14 +354,24 @@ def main():
             center_xy_real = (center_x_real, center_y_real)
             coordinate = (center, cX, cY)
             width_distance = (distance, pref_long, pref_short)
-            # if plate_type[res_index] == 'black':
-            #     dataline_black = ("black:", distance)
-            # elif plate_type[res_index] == 'yellow':
-            #     dataline_yellow = ("yellow:", distance)
-            # elif plate_type[res_index] == 'blue':
-            #     dataline_blue = ("blue:", distance)
-            compare_wh = (int(distance), int(width), int(height), int(yaw_actual), int(yaw_actual1))
 
+            compare_wh = (int(distance), int(width), int(height), int(yaw_actual), int(yaw_actual1))
+            box = cv2.boxPoints(min_area_rect)
+            box = np.int0(box)
+            distances = [np.linalg.norm(p - farthest_point) for p in box]
+            # 将角点和距离组合为列表
+            points_with_distances = list(zip(box, distances))
+            print(points_with_distances)
+            # 根据距离值进行排序
+            sorted_points = sorted(points_with_distances, key=lambda x: x[1])
+            point_1, distance1 = sorted_points[-2]
+            point_2, distance2 = sorted_points[-1]
+            average_x = (point_1[0] + point_2[0]) / 2
+            average_y = (point_1[1] + point_2[1]) / 2
+            print(average_x,average_y)
+            center_x_real1 = int((int(average_x) - x_pixel) / conver_x)
+            center_y_real1 = int((int(average_y) - y_pixel) / conver_y)
+            cv2.circle(canvas, (int(average_x), int(average_y)), 4, (0, 0, 255), -1)
             # print(center_xy_real)
             # print(int(distance), ":", center_x, ",", center_y, "(", x_pixel, y_pixel, ")", "(", conver_x, conver_y, ")",
             #       pref_long, ",", center_x_real, ",", center_y_real, ",", yaw_actual)
@@ -377,7 +384,7 @@ def main():
             # area_approx = cv2.contourArea(cnt)
             cv2.drawContours(canvas, [cnt], -1, (255, 0, 0), 2)  # for object contour
             cv2.drawContours(canvas, [rect_contour], -1, (0, 255, 0), 2)  # for rectagle contour
-            cv2.circle(canvas, (cX, cY), 4, (0, 255, 255), -1) # for mass center
+            cv2.circle(canvas, (cX, cY), 4, (0, 255, 255), -1)  # for mass center
             cv2.circle(canvas, (int(center.split(',')[0]), int(center.split(',')[1])), 4, (0, 0, 255), -1)
             # cv2.circle(canvas, (int(x2), int(y2)), 4, (0, 0, 255), -1)
             cv2.putText(canvas, center, (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
@@ -473,38 +480,38 @@ def main():
             #     if (center_x-x)^2 + (center_y-y)^2 == 500:
             #         function_x = function_x
 
-            if (cX1 > int(min_area_rect[0][0])) and (cY1 >= int(min_area_rect[0][1])):  # 重心在右下，矩阵中心在左上,方向左上
+            if (int(center.split(',')[0]) > int(average_x)) and (int(center.split(',')[1]) > int(average_y)):  # 重心在右下，矩阵中心在左上,方向左上
                 print(str(plate_type[res_index])+"左上")
                 # cv2.putText(canvas, "重心右下，中心左上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) - 180
-                if 0 < yaw_actual < 90:
+                if 0 < yaw_actual < 80:
                     yaw_actual = yaw_actual - 180
                 elif 90 < yaw_actual < 180:
                     yaw_actual = yaw_actual - 270
                 elif -90 < yaw_actual < 0:
                     yaw_actual = yaw_actual - 90
-                elif yaw_actual == 90:
-                    yaw_actual = yaw_actual - 180
+                elif 80< yaw_actual < 90:
+                    yaw_actual == -90
 
                 # cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 # , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
-            elif (cX1 > int(min_area_rect[0][0])) and (cY1 < int(min_area_rect[0][1])):  # 重心在右上，矩阵中心在左下
+            elif (int(center.split(',')[0]) > int(average_x)) and (int(center.split(',')[1]) < int(average_y)):  # 重心在右上，矩阵中心在左下
                 print(str(plate_type[res_index])+"左下")
                 # cv2.putText(canvas, "重心右上，中心左下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
                 yaw_actual1 = int(theta1) + 90
-                if -90 < yaw_actual < 0:
+                if -80 < yaw_actual < 0:
                     yaw_actual = yaw_actual + 180
-                elif -180 < yaw_actual < -90:
+                elif -180 < yaw_actual < -100:
                     yaw_actual = yaw_actual + 270
                 elif 90 > yaw_actual > 0:
                     yaw_actual = yaw_actual + 90
-                if yaw_actual == -90:
-                    yaw_actual = yaw_actual + 180
+                if -100 < yaw_actual < -80:
+                    yaw_actual ==  90
                 # cv2.arrowedLine(canvas, (x, y), (2 * x - center_x, 2 * y - center_y)
                 #                , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
-            elif (cX1 < int(min_area_rect[0][0])) and (cY1 >= int(min_area_rect[0][1])):  # 重心在左下，矩阵中心在右上
+            elif (int(center.split(',')[0]) < int(average_x)) and (int(center.split(',')[1]) >= int(average_y)):  # 重心在左下，矩阵中心在右上
                 print(str(plate_type[res_index])+"右上")
                 # cv2.putText(canvas, "重心左下，中心右上", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                 #            2)
@@ -515,41 +522,43 @@ def main():
                     yaw_actual = yaw_actual + 90
                 elif 0 < yaw_actual < 90:
                     yaw_actual = yaw_actual - 90
+                elif 80 < yaw_actual < 90:
+                    yaw_actual == -90
                 # cv2.arrowedLine(canvas, (x, y), (center_x, center_y)
                 #               , color=(0, 255, 255), thickness=2, line_type=8, shift=0, tipLength=0.05)
-            elif (cX1 < int(min_area_rect[0][0])) and (cY1 < int(min_area_rect[0][1])):
+            elif (int(center.split(',')[0]) < int(average_x)) and (int(center.split(',')[1]) < int(average_y)):
                 print(str(plate_type[res_index])+"右下")
                 # cv2.putText(canvas, "重心左上，中心右下", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255),
                             #2)
-                if -90 <yaw_actual < 0:
+                if -80 <yaw_actual < 0:
                     yaw_actual = yaw_actual + 90
-                elif -180 < yaw_actual < -90:
+                elif -180 < yaw_actual < -100:
                     yaw_actual = yaw_actual + 180
                 elif yaw_actual > 90:
                     yaw_actual = yaw_actual - 90
+                if -100 < yaw_actual < -80:
+                    yaw_actual ==  90
                 yaw_actual1 = int(theta1)
-                if yaw_actual == -90:
-                    yaw_actual = yaw_actual + 180
 
-            if 180 < yaw_actual <= 270:  # double check
-                yaw_actual = yaw_actual - 360
-            elif -270 <= yaw_actual < -180:
-                yaw_actual = yaw_actual + 360
+            # if 180 < yaw_actual <= 270:  # double check
+            #     yaw_actual = yaw_actual - 360
+            # elif -270 <= yaw_actual < -180:
+            #     yaw_actual = yaw_actual + 360
             yaw_actual2 = 0
 
-            if 90 < yaw_actual < 180:
+            if 90 < yaw_actual1 < 180:
                 yaw_actual2 = 270 - yaw_actual
-            elif yaw_actual == 90:
+            elif yaw_actual1 == 90:
                 yaw_actual2 = 180
-            elif yaw_actual == -90:
+            elif yaw_actual1 == -90:
                 yaw_actual2 = 0
-            elif yaw_actual == -180:
+            elif yaw_actual1 == -180:
                 yaw_actual2 = 90
-            elif yaw_actual == 0:
+            elif yaw_actual1 == 0:
                 yaw_actual2 = -90
             else:
                 yaw_actual2 = -90 - yaw_actual
-            cv2.putText(canvas, str(round(yaw_actual,2)), (cX + 20, cY + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(canvas, str(round(yaw_actual1)), (cX + 20, cY + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             log = open('data.txt', mode='a', encoding='utf-8')
             if keyboard.is_pressed('t'):
                 switch = 1  # choose if you want to record data
@@ -557,7 +566,7 @@ def main():
             elif keyboard.is_pressed('y'):
                 switch = 0
             if (counter % 1 == 0) and (switch == 1):  # 帧数速度控制
-                print(int(counter), timestamp, plate_type[res_index], center, yaw_actual, distance)
+                print(int(counter), timestamp, plate_type[res_index], center, yaw_actual1, distance)
                 # print(int(counter),date,micro, plate_type[res_index], center_x, center_y, yaw_actual,
                 #      center_x_real, center_y_real, int(distance), file=log)
                 print(distance, pref_long, file=log)
@@ -569,20 +578,22 @@ def main():
                 last_x_real[0] = center_x_real
                 last_y_real[0] = center_y_real
                 last_distance[0] = distance
+                yaw1 = yaw_actual
+                x11 = center_x_real
+                y11 = center_y_real
                 record_yaw_blue[counter % 5] = yaw_actual2
                 yaw_actual_bluee = yaw_actual2
                 last_yaw[0] = yaw_actual2
-            elif plate_type[res_index] == 'yellow':
-                last_x_real[1] = center_x_real
-                last_y_real[1] = center_y_real
-                last_distance[1] = distance
-                last_yaw[1] = yaw_actual2
+                contour1 = cnt
             elif plate_type[res_index] == 'black':
                 last_x_real[2] = center_x_real
                 last_y_real[2] = center_y_real
+                yaw2 = yaw_actual
+                x2 = center_x_real
+                y2 = center_y_real
                 last_distance[2] = distance
                 yaw_actual_blackk = yaw_actual2
-
+                contour2 = cnt
                 record_yaw_black[counter % 5] = yaw_actual2
                 last_yaw[2] = yaw_actual2
 
@@ -591,6 +602,47 @@ def main():
         # cv2.resizeWindow("Camera", 1280,720)
         # print(distance,pref)
         cv2.imshow("Camera1", canvas)  # show the screen for camera
+        # for point in contour1:
+        #     distance = cv2.pointPolygonTest(contour2, tuple(point[0]), True)
+        #     if distance < min_distance:
+        #         min_distance = distance
+        point1 = np.array([x11,y11]) #blue
+        point2 = np.array([x2,y2]) #black
+        print(point1,point2)
+        min_distance1 = cv2.norm(point1,point2)
+        print("distance",min_distance1)
+        delta_x = x2-x11
+        delta_y = y2-y11
+        yaw12 = math.atan2(delta_y, delta_x)
+        yaw21 = math.atan2(-delta_y,-delta_x)
+        yaw_degrees12 = math.degrees(yaw12) # 1 blue 2 black
+        yaw_degrees21 = math.degrees(yaw21)
+        if 90 < yaw_degrees12 < 180:
+            yaw_actual3 = 270 - yaw_actual
+        elif yaw_degrees12 == 90:
+            yaw_actual3 = 180
+        elif yaw_degrees12 == -90:
+            yaw_actual3 = 0
+        elif yaw_degrees12 == -180:
+            yaw_actual3 = 90
+        elif yaw_degrees12 == 0:
+            yaw_actual3 = -90
+        else:
+            yaw_actual3 = -90 - yaw_degrees12
+
+        if 90 < yaw_degrees21 < 180:
+            yaw_actual4 = 270 - yaw_actual
+        elif yaw_degrees21 == 90:
+            yaw_actual4 = 180
+        elif yaw_degrees21 == -90:
+            yaw_actual4 = 0
+        elif yaw_degrees21 == -180:
+            yaw_actual4 = 90
+        elif yaw_degrees21 == 0:
+            yaw_actual4 = -90
+        else:
+            yaw_actual4 = -90 - yaw_degrees21
+        print("yaw_degree",yaw_degrees12,yaw_degrees21)
         if cv2.waitKey(1) & 0XFF == ord("q"):
             break
 
@@ -603,22 +655,26 @@ def main():
         if keyboard.is_pressed('s'):
             state = 1
 
-        if counter % 3 == 0 and state == 1:
+        if counter % 1 == 0 and state == 1:
             # print(distance)
             yaw_actual_blue = np.median(record_yaw_blue)
             yaw_actual_black = np.median(record_yaw_black)
 
             # yaw_actual_blue = record_yaw_blue[0]
             # yaw_actual_black = record_yaw_blue[0]
-            obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_bluee]]
-            obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_blackk]]
+            if min_distance1 < 20:
+                bump = 1
+            else:
+                bump = 0
+            obs_blue = [[-last_y_real[0], -last_x_real[0], yaw_actual_bluee, bump, yaw_actual3]]
+            obs_black = [[-last_y_real[2], -last_x_real[2], yaw_actual_blackk, bump, yaw_actual4]]
             # obs_blue = [[-last_y_real[0], -last_x_real[0], last_yaw[0]]]
             # obs_black = [[-last_y_real[2], -last_x_real[2], last_yaw[2]]]
 
-            action = model.predict(obs_blue)
-            action_blue = action[0][0]
-            action = model.predict(obs_black)
-            action_black = action[0][1]
+            action = model_blue.predict(obs_blue)
+            action_blue = action[0]
+            action = model_black.predict(obs_black)
+            action_black = action[0]
             print("{}".format(obs_black))
             print("Black:{}".format(action_black))
             print("{}".format(obs_blue))
